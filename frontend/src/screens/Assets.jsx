@@ -11,13 +11,6 @@ const ASSETS = [
   },
   {
     id: 2,
-    title: 'Price List',
-    category: 'Marketing',
-    url: 'https://placehold.co/600x800/1E1E1E/FFF?text=Price+List', 
-    description: 'Menu dan Harga Dimsavor'
-  },
-  {
-    id: 3,
     title: 'Poster',
     category: 'Marketing',
     url: '../../images/Poster.png',
@@ -41,7 +34,7 @@ export default function Assets() {
           Assets Library
         </h1>
         <p className="text-[14px] text-[var(--text-secondary)] font-['Inter'] mt-[4px]">
-          Kumpulan QRIS, Pricelist, dan materi promosi.
+          Kumpulan QRIS dan materi promosi.
         </p>
       </div>
 

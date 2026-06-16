@@ -560,7 +560,7 @@ export default function Dashboard() {
 
       <OrderDrawer 
         isOpen={!!selectedOrder} 
-        order={selectedOrder} 
+        order={selectedOrder ? orders.find(o => o.id_order === selectedOrder.id_order) : null}
         items={selectedOrder ? items.filter(i => i.id_order === selectedOrder.id_order) : []}
         onClose={() => setSelectedOrder(null)}
         onCancelOrder={handleCancelOrder}

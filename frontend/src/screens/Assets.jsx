@@ -4,10 +4,10 @@ import { Download } from 'lucide-react';
 const ASSETS = [
   {
     id: 1,
-    title: 'QRIS BCA',
+    title: 'QRIS',
     category: 'Payment',
-    url: 'https://placehold.co/400x600/1E1E1E/FFF?text=QRIS+BCA', // Placeholder, to be replaced by actual QRIS later
-    description: 'QRIS Resmi Dimsavor (BCA a.n Aditya)'
+    url: '../../public/images/QRIS.jpeg',
+    description: 'QRIS Dimsavor (BCA a.n Amara Dimsum)'
   },
   {
     id: 2,
@@ -18,10 +18,10 @@ const ASSETS = [
   },
   {
     id: 3,
-    title: 'Instagram Post Template',
+    title: 'Poster',
     category: 'Marketing',
-    url: 'https://placehold.co/800x800/1E1E1E/FFF?text=IG+Template',
-    description: 'Template kosong untuk post Instagram'
+    url: '../../public/images/Poster.png',
+    description: 'Poster untuk post'
   }
 ];
 

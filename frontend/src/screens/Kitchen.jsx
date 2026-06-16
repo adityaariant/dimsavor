@@ -26,17 +26,20 @@ export default function Kitchen() {
   
   if (!session) return <div className="p-8 text-center text-[var(--text-secondary)] mt-20 font-['Inter'] text-[13px]">Tidak ada sesi aktif.</div>;
 
-  const ordersForDate = data.orders.filter(o => (o.delivery_slots?.jadwal_teks || 'Manual') === activeDate);
+  const safeOrders = data.orders || [];
+  const safeItems = data.items || [];
+
+  const ordersForDate = safeOrders.filter(o => (o.delivery_slots?.jadwal_teks || 'Manual') === activeDate);
   const orderIdsForDate = ordersForDate.map(o => o.id_order);
   
   // Items are already decomposed by the backend
-  const itemsForDate = data.items.filter(i => {
+  const itemsForDate = safeItems.filter(i => {
     const oId = i.id_order || i.source_order_id;
     return orderIdsForDate.includes(oId);
   });
 
   const getKitchenCode = (nama_produk) => {
-    const alias = data.aliases.find(a => a.nama_produk_baku === nama_produk);
+    const alias = (data.aliases || []).find(a => a.nama_produk_baku === nama_produk);
     return alias ? alias.kitchen_code : '?';
   };
 
@@ -55,7 +58,7 @@ export default function Kitchen() {
   const finalPcs = totalDimsumPcs % 6;
   const totalPcsAll = totalDimsumPcs;
 
-  const dates = Array.from(new Set(data.orders.map(o => o.delivery_slots?.jadwal_teks || 'Manual')));
+  const dates = Array.from(new Set(safeOrders.map(o => o.delivery_slots?.jadwal_teks || 'Manual')));
 
   // Group items by order
   const groupedItems = {};

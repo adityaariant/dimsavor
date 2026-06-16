@@ -244,6 +244,18 @@ export default function ReviewForm({ initialData, session, onDiscard, refreshSes
               </div>
             </div>
             <div className="flex items-center">
+              <span className="w-24 form-label mb-0">Pembayaran:</span>
+              <select 
+                className="form-select flex-1 h-[32px] text-[13px]"
+                value={data.metode_bayar || 'BCA'}
+                onChange={e => setData({...data, metode_bayar: e.target.value})}
+              >
+                {['QRIS', 'BCA', 'BNI', 'Cash Adit', 'Cash Kila', 'Shopeepay', 'Dana'].map(m => (
+                  <option key={m} value={m}>{m}</option>
+                ))}
+              </select>
+            </div>
+            <div className="flex items-center">
               <span className="w-24 form-label mb-0">Ongkir:</span>
               <div className="flex-1 flex gap-[8px] items-center">
                 <span className="font-['JetBrains_Mono'] text-[12px] text-[var(--text-secondary)]">Rp</span>

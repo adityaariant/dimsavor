@@ -135,6 +135,19 @@ class WaOrderParser:
             return 0, 'Slot'
         return 2000, 'Flat'
 
+    def _normalize_payment(self, bayar_text: str) -> str:
+        if not bayar_text:
+            return 'BCA'
+        lower = bayar_text.lower()
+        if 'qris' in lower: return 'QRIS'
+        if 'bca' in lower: return 'BCA'
+        if 'bni' in lower: return 'BNI'
+        if 'shopee' in lower or 'spay' in lower: return 'Shopeepay'
+        if 'dana' in lower: return 'Dana'
+        if 'kila' in lower: return 'Cash Kila'
+        if 'adit' in lower: return 'Cash Adit'
+        return 'BCA'
+
     def _build_review_form(self, fields: dict, items: list[dict], area: str, slot: dict | None, ongkir: int, rule: str, unmatched_tokens: list[str]) -> dict:
         total = sum(i['subtotal'] for i in items if not i['_unmatched']) + ongkir
         
@@ -151,7 +164,7 @@ class WaOrderParser:
             'area_tag': area,
             'jadwal_kirim_request': fields.get('waktu', ''),
             'matched_slot': slot,
-            'metode_bayar': fields.get('bayar', ''),
+            'metode_bayar': self._normalize_payment(fields.get('bayar', '')),
             'ongkir': ongkir,
             'ongkir_rule': rule,
             'items': items,

@@ -214,6 +214,52 @@ export default function Finance() {
                 <div className="font-semibold text-[24px] text-[var(--text-primary)] font-['Space_Grotesk'] leading-none">{formatRupiah(preview?.kila_receives || 0)}</div>
               </div>
             </div>
+
+            {/* Settlement Block */}
+            <div className="bg-[var(--bg-muted)] p-[16px] rounded-[6px] border border-[var(--border)] mt-[24px]">
+              <div className="text-[var(--text-primary)] font-semibold mb-[12px] text-[14px]">Settlement Akhir</div>
+              
+              <div className="space-y-[8px] mb-[16px] text-[13px]">
+                <div className="flex justify-between text-[var(--text-secondary)]">
+                  <span>Uang dipegang Adit:</span>
+                  <span className="font-['JetBrains_Mono'] text-[var(--text-primary)]">{formatRupiah(preview?.adit_pegang || 0)}</span>
+                </div>
+                <div className="flex justify-between text-[var(--text-secondary)]">
+                  <span>Uang dipegang Kila:</span>
+                  <span className="font-['JetBrains_Mono'] text-[var(--text-primary)]">{formatRupiah(preview?.kila_pegang || 0)}</span>
+                </div>
+              </div>
+
+              {preview?.adit_transfer_to_kila > 0 && (
+                <div className="bg-[var(--amber)]/10 border border-[var(--amber)]/30 rounded-[6px] p-[12px] flex items-center gap-[12px]">
+                  <div className="text-[20px]">💸</div>
+                  <div>
+                    <div className="text-[11px] text-[var(--text-secondary)] uppercase tracking-wider mb-[2px]">Instruksi Transfer</div>
+                    <div className="text-[13px] text-[var(--text-primary)]">
+                      Adit transfer ke Kila sebesar <span className="font-bold font-['Space_Grotesk'] text-[var(--amber)]">{formatRupiah(preview.adit_transfer_to_kila)}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {preview?.kila_transfer_to_adit > 0 && (
+                <div className="bg-[var(--amber)]/10 border border-[var(--amber)]/30 rounded-[6px] p-[12px] flex items-center gap-[12px]">
+                  <div className="text-[20px]">💸</div>
+                  <div>
+                    <div className="text-[11px] text-[var(--text-secondary)] uppercase tracking-wider mb-[2px]">Instruksi Transfer</div>
+                    <div className="text-[13px] text-[var(--text-primary)]">
+                      Kila transfer ke Adit sebesar <span className="font-bold font-['Space_Grotesk'] text-[var(--amber)]">{formatRupiah(preview.kila_transfer_to_adit)}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {preview?.adit_transfer_to_kila === 0 && preview?.kila_transfer_to_adit === 0 && (
+                <div className="bg-[var(--bg-elevated)] border border-[var(--border)] rounded-[6px] p-[12px] text-center text-[12px] text-[var(--text-secondary)]">
+                  Selesai! Tidak ada transfer yang diperlukan.
+                </div>
+              )}
+            </div>
           </div>
 
           {!isClosed && (

@@ -20,12 +20,13 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_middleware(SlowAPIMiddleware)
 
-origins = os.environ.get("CORS_ALLOWED_ORIGINS", "").split(",")
+origins_env = os.environ.get("CORS_ALLOWED_ORIGINS", "*")
+origins = origins_env.split(",") if origins_env else ["*"]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    allow_credentials=True,
+    allow_credentials=False, # JWT is stateless, credentials not needed, allows wildcard origins
     allow_methods=["*"],
     allow_headers=["*"],
 )

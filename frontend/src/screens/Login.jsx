@@ -34,7 +34,7 @@ export default function Login() {
         </div>
         
         <h2 className="text-center text-[24px] font-['Space_Grotesk'] font-semibold text-[var(--text-primary)] mb-2">
-          DimsaVora Ops
+          Dimsavor Ops
         </h2>
         <p className="text-center text-[13px] text-[var(--text-secondary)] font-['Inter'] mb-8">
           Masuk ke sistem operasi Dimsavor.
@@ -48,7 +48,7 @@ export default function Login() {
               className="form-input"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="adit@dimsavor.internal"
+              placeholder="[EMAIL_ADDRESS]"
               required
             />
           </div>

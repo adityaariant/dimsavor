@@ -57,9 +57,11 @@ class WaOrderParser:
             lower_token = token.lower()
             
             qty = 1
-            qty_match = re.search(r'(?:x\s*)?(\d+)\s*(?:pcs|box|x)?', lower_token)
+            unit = None
+            qty_match = re.search(r'(?:x\s*)?(\d+)\s*(pcs|box|x|butir|biji)?', lower_token)
             if qty_match:
                 qty = int(qty_match.group(1))
+                unit = qty_match.group(2)
                 lower_token = lower_token.replace(qty_match.group(0), '').strip()
             
             topping = None
@@ -73,18 +75,69 @@ class WaOrderParser:
             matched = False
             for keyword, data in self.alias_map.items():
                 if keyword in lower_token:
-                    price = self._get_price(data['nama_produk_baku'])
-                    subtotal = qty * price
-                    if topping:
-                        subtotal += qty * 1000
-                        
-                    items.append({
-                        'nama_produk': data['nama_produk_baku'],
-                        'qty': qty,
-                        'topping': topping,
-                        'subtotal': subtotal,
-                        '_unmatched': False
-                    })
+                    product_name = data['nama_produk_baku']
+                    is_dimsum = 'dimsum' in product_name.lower() or product_name == 'BAdil'
+                    
+                    if is_dimsum and (unit in ['pcs', 'butir', 'biji'] or qty not in [1, 2, 3, 4, 6]):
+                        is_mentai = 'mentai' in product_name.lower()
+                        if is_mentai:
+                            if qty == 6:
+                                items.append({
+                                    'nama_produk': 'Dimsum Mentai 6pcs',
+                                    'qty': 1,
+                                    'topping': topping,
+                                    'subtotal': 19000,
+                                    '_unmatched': False
+                                })
+                            elif qty == 4:
+                                items.append({
+                                    'nama_produk': 'Dimsum Mentai 4pcs',
+                                    'qty': 1,
+                                    'topping': topping,
+                                    'subtotal': 15000,
+                                    '_unmatched': False
+                                })
+                            else:
+                                items.append({
+                                    'nama_produk': 'Dimsum Mentai',
+                                    'qty': qty,
+                                    'topping': topping,
+                                    'subtotal': 0,
+                                    'is_custom_price': True,
+                                    '_unmatched': False
+                                })
+                        else:
+                            if qty == 6:
+                                items.append({
+                                    'nama_produk': 'Dimsum Original',
+                                    'qty': 1,
+                                    'topping': topping,
+                                    'subtotal': 16000,
+                                    '_unmatched': False
+                                })
+                            else:
+                                items.append({
+                                    'nama_produk': 'Dimsum Original',
+                                    'qty': qty,
+                                    'topping': topping,
+                                    'subtotal': 0,
+                                    'is_custom_price': True,
+                                    '_unmatched': False
+                                })
+                    else:
+                        price = self._get_price(product_name)
+                        subtotal = qty * price
+                        if topping:
+                            subtotal += qty * 1000
+                            
+                        items.append({
+                            'nama_produk': product_name,
+                            'qty': qty,
+                            'topping': topping,
+                            'subtotal': subtotal,
+                            '_unmatched': False
+                        })
+                    
                     matched = True
                     break
             
@@ -102,13 +155,13 @@ class WaOrderParser:
 
     def _get_price(self, product_name: str) -> int:
         prices = {
-            'Dimsum Original': 15000,
-            'Dimsum Mentai 6pcs': 24000, # inference based on ratio
-            'Dimsum Mentai 4pcs': 16000,
-            'Bacar Kecil 120ml': 16000, # Bacar 4pcs
-            'Bacar Besar 150ml': 24000, # Bacar 6pcs
-            'BSweet': 35000,
-            'BAdil': 55000
+            'Dimsum Original': 16000,
+            'Dimsum Mentai 6pcs': 19000,
+            'Dimsum Mentai 4pcs': 15000,
+            'Bacar Kecil 120ml': 8000,
+            'Bacar Besar 150ml': 10000,
+            'BSweet': 27000,
+            'BAdil': 27000
         }
         return prices.get(product_name, 0)
 

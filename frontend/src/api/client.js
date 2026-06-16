@@ -1,4 +1,8 @@
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
+const API_BASE = import.meta.env.VITE_API_BASE_URL;
+
+if (!API_BASE) {
+  console.error("Missing API Base URL. Pastikan VITE_API_BASE_URL sudah diisi di Vercel/Environment Variables.");
+}
 
 export let currentApiKey = null;
 export const setApiKey = (key) => currentApiKey = key;

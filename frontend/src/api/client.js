@@ -12,7 +12,7 @@ export async function apiFetch(endpoint, options = {}) {
   };
   
   if (currentApiKey) {
-    headers['X-API-Key'] = currentApiKey;
+    headers['Authorization'] = `Bearer ${currentApiKey}`;
   }
 
   const response = await fetch(url, {

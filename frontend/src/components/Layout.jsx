@@ -59,6 +59,8 @@ export default function Layout() {
           const active = data.find(s => s.status === 'Active');
           const initialId = active ? active.id_po : data[0].id_po;
           setSelectedSessionId(initialId);
+        } else {
+          setSessionData(prev => ({ ...prev, loading: false }));
         }
       } catch (err) {
         console.error('Failed to fetch sessions for layout', err);

@@ -2,16 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Outlet, NavLink } from 'react-router-dom';
 import { apiFetch } from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
-import { LayoutDashboard, Calendar, FileText, ShoppingBag, ChefHat, DollarSign, Settings, Share2, Menu, X, LogOut } from 'lucide-react';
+import { LayoutDashboard, Calendar, DollarSign, Settings, Share2, Menu, X, LogOut } from 'lucide-react';
 
 export default function Layout() {
   const { logout, displayName } = useAuth();
   const navItems = [
     { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { to: '/sessions', label: 'Sessions', icon: Calendar },
-    { to: '/parse', label: 'Order Parser', icon: FileText },
-    { to: '/orders', label: 'Orders', icon: ShoppingBag },
-    { to: '/kitchen', label: 'Kitchen Board', icon: ChefHat },
     { to: '/finance', label: 'Finance', icon: DollarSign },
     { to: '/alias', label: 'Alias Manager', icon: Settings },
     { to: '/assets', label: 'Assets', icon: Share2 },

@@ -45,7 +45,7 @@ export default function ReviewForm({ initialData, session, onDiscard, refreshSes
     }
 
     const newItems = data.items.map(item => {
-      if (item._unmatched) return item;
+      if (item._unmatched || item.is_custom_price) return item;
       return {
         ...item,
         subtotal: calculateSubtotal(item.nama_produk, item.qty, item.topping)
@@ -136,10 +136,10 @@ export default function ReviewForm({ initialData, session, onDiscard, refreshSes
         await refreshSessionData();
       }
       
-      if (isEditMode && onDiscard) {
-        onDiscard(); // act as close drawer
+      if (onDiscard) {
+        onDiscard();
       } else {
-        navigate('/orders');
+        navigate('/dashboard');
       }
     } catch (err) {
       alert("Gagal menyimpan: " + err.message);
@@ -147,6 +147,21 @@ export default function ReviewForm({ initialData, session, onDiscard, refreshSes
       setSaving(false);
       setIsQuotaModalOpen(false);
     }
+  };
+
+  const handleAddItem = () => {
+    const newItem = {
+      nama_produk: '',
+      qty: 1,
+      topping: '',
+      subtotal: 0,
+      is_custom_price: false,
+      _unmatched: false
+    };
+    setData({
+      ...data,
+      items: [...data.items, newItem]
+    });
   };
 
   const handleItemDelete = (index) => {
@@ -161,7 +176,7 @@ export default function ReviewForm({ initialData, session, onDiscard, refreshSes
       ...newItems[index],
       _unmatched: false,
       nama_produk: newProductName,
-      subtotal: 0 // Simplification, would ideally re-price via backend
+      is_custom_price: newProductName === newItems[index].nama_produk ? true : false
     };
     setData({...data, items: newItems});
   };
@@ -294,7 +309,16 @@ export default function ReviewForm({ initialData, session, onDiscard, refreshSes
 
         {/* Item Pesanan */}
         <div>
-          <h3 className="card-header border-b border-[var(--border)] pb-[8px] mb-[12px]">Item Pesanan</h3>
+          <div className="flex justify-between items-center mb-[12px]">
+            <h3 className="card-header border-b-0 pb-0 mb-0">Item Pesanan</h3>
+            <button
+              type="button"
+              onClick={handleAddItem}
+              className="text-[12px] text-[var(--amber)] hover:underline font-medium flex items-center gap-[4px]"
+            >
+              ➕ Tambah Item Baru
+            </button>
+          </div>
           <div className="border border-[var(--border)] rounded-[6px] overflow-hidden">
             <table className="min-w-full text-left">
               <thead className="bg-[var(--bg-elevated)] border-b border-[var(--border)]">
@@ -302,7 +326,7 @@ export default function ReviewForm({ initialData, session, onDiscard, refreshSes
                   <th className="px-[12px] py-[8px] text-[12px] font-medium text-[var(--text-secondary)]">Produk</th>
                   <th className="px-[12px] py-[8px] text-[12px] font-medium text-[var(--text-secondary)] text-center w-[60px]">Qty</th>
                   <th className="px-[12px] py-[8px] text-[12px] font-medium text-[var(--text-secondary)]">Topping</th>
-                  <th className="px-[12px] py-[8px] text-[12px] font-medium text-[var(--text-secondary)] text-right">Subtotal</th>
+                  <th className="px-[12px] py-[8px] text-[12px] font-medium text-[var(--text-secondary)] text-right w-[150px]">Subtotal</th>
                   <th className="px-[12px] py-[8px] w-[40px]"></th>
                 </tr>
               </thead>
@@ -311,23 +335,55 @@ export default function ReviewForm({ initialData, session, onDiscard, refreshSes
                   <tr key={idx} className={item._unmatched ? 'bg-[var(--status-cancelled)]/10' : ''}>
                     <td className="px-[12px] py-[8px]">
                       {item._unmatched ? (
-                        <div className="flex flex-col gap-1">
-                          <span className="text-[var(--status-cancelled)] font-medium text-[12px]">⚠️ "{data.unmatched_tokens?.[0] || 'Unmatched'}"</span>
-                          <select 
-                            className="form-select h-[28px] text-[11px] p-1"
-                            onChange={e => handleUnmatchedResolve(idx, e.target.value)}
-                            defaultValue=""
-                          >
-                            <option value="" disabled>Pilih Produk...</option>
-                            {aliases.map(a => <option key={a} value={a}>{a}</option>)}
-                          </select>
+                        <div className="flex flex-col gap-1.5 p-1">
+                          <span className="text-[var(--status-cancelled)] font-medium text-[11px]">⚠️ Teks asli: "{item.nama_produk}"</span>
+                          <div className="flex gap-1.5">
+                            <select 
+                              className="form-select h-[28px] text-[11px] p-1 flex-1 min-w-0"
+                              onChange={e => handleUnmatchedResolve(idx, e.target.value)}
+                              defaultValue=""
+                            >
+                              <option value="" disabled>Match ke alias baku...</option>
+                              {aliases.map(a => <option key={a} value={a}>{a}</option>)}
+                            </select>
+                            <button
+                              type="button"
+                              onClick={() => handleUnmatchedResolve(idx, item.nama_produk)}
+                              className="btn-secondary h-[28px] text-[10px] px-2 whitespace-nowrap border border-[var(--border)] bg-[#2A2722] text-[#EDE9E0]"
+                            >
+                              Gunakan teks asli
+                            </button>
+                          </div>
                         </div>
                       ) : (
-                        <input className="form-input h-[28px] text-[12px] bg-transparent border-transparent px-1 cursor-default focus:ring-0" value={item.nama_produk} readOnly />
+                        <input 
+                          list="products-datalist"
+                          className="form-input h-[28px] text-[12px] bg-transparent border-transparent px-1 focus:border-[var(--border)] focus:bg-[var(--bg-elevated)] focus:ring-0" 
+                          value={item.nama_produk} 
+                          placeholder="Pilih atau ketik produk..."
+                          onChange={e => {
+                            const newItems = [...data.items];
+                            newItems[idx].nama_produk = e.target.value;
+                            // reset custom price if changed to a standard Baku product
+                            const standardPrices = {
+                              "Dimsum Original": 16000,
+                              "Dimsum Mentai 6pcs": 19000,
+                              "Dimsum Mentai 4pcs": 15000,
+                              "Bacar Kecil 120ml": 8000,
+                              "Bacar Besar 150ml": 10000,
+                              "BSweet": 27000,
+                              "BAdil": 27000
+                            };
+                            if (standardPrices[e.target.value]) {
+                              newItems[idx].is_custom_price = false;
+                            }
+                            setData({...data, items: newItems});
+                          }}
+                        />
                       )}
                     </td>
                     <td className="px-[12px] py-[8px] text-center">
-                      <input className="form-input h-[28px] text-[12px] font-['JetBrains_Mono'] px-1 text-center w-full" type="number" min="1" value={item.qty || 1} onChange={e => {
+                      <input className="form-input h-[28px] text-[12px] font-['JetBrains_Mono'] px-1 text-center w-full focus:ring-0" type="number" min="1" value={item.qty || 1} onChange={e => {
                         const newItems = [...data.items];
                         newItems[idx].qty = Number(e.target.value);
                         setData({...data, items: newItems});
@@ -336,7 +392,7 @@ export default function ReviewForm({ initialData, session, onDiscard, refreshSes
                     <td className="px-[12px] py-[8px]">
                       {!item._unmatched && (
                         <input 
-                          className="form-input h-[28px] text-[12px] w-full" 
+                          className="form-input h-[28px] text-[12px] w-full focus:ring-0" 
                           value={item.topping || ''} 
                           onChange={e => {
                             const newItems = [...data.items];
@@ -347,8 +403,39 @@ export default function ReviewForm({ initialData, session, onDiscard, refreshSes
                         />
                       )}
                     </td>
-                    <td className="px-[12px] py-[8px] text-right text-[12px] font-['JetBrains_Mono']">
-                      {!item._unmatched && formatRupiah(item.subtotal)}
+                    <td className="px-[12px] py-[8px] text-right text-[12px]">
+                      {!item._unmatched && (
+                        <div className="flex items-center justify-end gap-1">
+                          <span className="text-[10px] text-[var(--text-secondary)]">Rp</span>
+                          <input
+                            type="number"
+                            className={`form-input h-[28px] text-[12px] font-['JetBrains_Mono'] px-1 text-right w-[75px] focus:ring-0 ${
+                              item.is_custom_price ? 'border-[var(--amber)] bg-[#3D2A08]/40 text-[var(--amber)] font-bold' : 'border-transparent bg-transparent'
+                            }`}
+                            value={item.subtotal || 0}
+                            onChange={e => {
+                              const newItems = [...data.items];
+                              newItems[idx].subtotal = parseInt(e.target.value) || 0;
+                              newItems[idx].is_custom_price = true;
+                              setData({...data, items: newItems});
+                            }}
+                          />
+                          {item.is_custom_price && (
+                            <button
+                              type="button"
+                              title="Reset ke harga otomatis"
+                              onClick={() => {
+                                const newItems = [...data.items];
+                                newItems[idx].is_custom_price = false;
+                                setData({...data, items: newItems});
+                              }}
+                              className="text-[9px] text-[var(--amber)] hover:underline ml-1 font-bold bg-[#3D2A08] px-1 py-0.5 rounded border border-[#7A520F]"
+                            >
+                              Auto
+                            </button>
+                          )}
+                        </div>
+                      )}
                     </td>
                     <td className="px-[12px] py-[8px] text-center text-[var(--text-disabled)] hover:text-[var(--status-cancelled)] cursor-pointer" onClick={() => handleItemDelete(idx)}>
                       <Trash2 className="w-4 h-4 mx-auto" />
@@ -358,6 +445,11 @@ export default function ReviewForm({ initialData, session, onDiscard, refreshSes
               </tbody>
             </table>
           </div>
+          <datalist id="products-datalist">
+            {aliases.map(a => (
+              <option key={a} value={a} />
+            ))}
+          </datalist>
         </div>
 
         {/* Ringkasan */}

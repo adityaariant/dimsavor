@@ -33,17 +33,108 @@ export function calculateSubtotal(nama_produk, qty, topping) {
 }
 
 export function countDimsumBoxes(items) {
-  let count = 0;
+  let total_boxes = 0;
+  let total_pcs = 0;
+
   for (const item of items) {
     const name = item.nama_produk || '';
     const qty = item.qty || 1;
-    if (name.includes('Dimsum') || name.includes('Bacar')) {
-      count += qty;
+    const lower = name.toLowerCase();
+
+    if (name === 'BAdil') {
+      total_boxes += qty; // BAdil contains 1 box of dimsum
     } else if (name === 'BSweet') {
-      count += 2 * qty;
-    } else if (name === 'BAdil') {
-      count += 3 * qty;
+      // BSweet is Bacar only, 0 boxes of dimsum
+    } else if (lower === 'dimsum original' || lower === 'dimsum mentai 6pcs' || lower === 'dimsum mentai 4pcs') {
+      total_boxes += qty;
+    } else if (lower.includes('original') || lower.includes('mentai') || lower.includes('ori')) {
+      // Custom pieces
+      total_pcs += qty;
     }
   }
-  return count;
+
+  return total_boxes + Math.floor(total_pcs / 6);
 }
+
+export function countDimsumBoxesDecomposed(decomposedItems) {
+  let total_boxes = 0;
+  let total_pcs = 0;
+
+  for (const item of decomposedItems) {
+    const name = item.nama_produk || '';
+    const qty = item.qty || 0;
+    const lower = name.toLowerCase();
+
+    if (lower === 'dimsum original' || lower === 'dimsum mentai 6pcs' || lower === 'dimsum mentai 4pcs') {
+      total_boxes += qty;
+    } else if (lower.includes('original') || lower.includes('mentai') || lower.includes('ori')) {
+      total_pcs += qty;
+    }
+  }
+
+  return total_boxes + Math.floor(total_pcs / 6);
+}
+
+export function calculateProductionSummary(decomposedItems) {
+  let box_mentai = 0;
+  let box_ori = 0;
+  let box_mix = 0;
+  let pcs_mentai = 0;
+  let pcs_ori = 0;
+  let cup_bb = 0;
+  let cup_bk = 0;
+
+  for (const item of decomposedItems) {
+    const name = item.nama_produk || '';
+    const qty = item.qty || 0;
+    const lowerName = name.toLowerCase();
+    const sourceBundle = item.source_bundle || '';
+
+    if (sourceBundle === 'BAdil') {
+      if (lowerName.includes('bacar besar')) {
+        box_mix += qty;
+        cup_bb += qty;
+      } else if (lowerName.includes('original')) {
+        pcs_ori += qty;
+      } else if (lowerName.includes('mentai')) {
+        pcs_mentai += qty;
+      }
+    } else if (sourceBundle === 'BSweet') {
+      if (lowerName.includes('bacar besar')) {
+        cup_bb += qty;
+      }
+    } else {
+      if (lowerName === 'dimsum mentai 6pcs' || (lowerName.includes('mentai') && lowerName.includes('6pcs'))) {
+        box_mentai += qty;
+        pcs_mentai += qty * 6;
+      } else if (lowerName === 'dimsum mentai 4pcs' || (lowerName.includes('mentai') && lowerName.includes('4pcs'))) {
+        box_mentai += qty;
+        pcs_mentai += qty * 4;
+      } else if (lowerName === 'dimsum original' || (lowerName.includes('original') && !lowerName.includes('pcs') && !lowerName.includes('('))) {
+        box_ori += qty;
+        pcs_ori += qty * 6;
+      } else if (lowerName.includes('bacar besar') || lowerName.includes('bb')) {
+        cup_bb += qty;
+      } else if (lowerName.includes('bacar kecil') || lowerName.includes('bk')) {
+        cup_bk += qty;
+      } else {
+        if (lowerName.includes('mentai')) {
+          pcs_mentai += qty;
+        } else if (lowerName.includes('original') || lowerName.includes('ori')) {
+          pcs_ori += qty;
+        }
+      }
+    }
+  }
+
+  return {
+    box_mentai,
+    box_ori,
+    box_mix,
+    pcs_mentai,
+    pcs_ori,
+    cup_bb,
+    cup_bk
+  };
+}
+

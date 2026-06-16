@@ -27,6 +27,11 @@ export default function Dashboard() {
   const [search, setSearch] = useState('');
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [slots, setSlots] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filter, slotFilter, search]);
 
   useEffect(() => {
     if (session) {
@@ -449,7 +454,7 @@ export default function Dashboard() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[var(--border)]">
-                  {filteredOrders.map(order => {
+                  {filteredOrders.slice((currentPage - 1) * 5, currentPage * 5).map(order => {
                     const orderItems = items.filter(i => i.id_order === order.id_order);
                     const totalAmount = orderItems.reduce((s, i) => s + (i.subtotal||0), 0) + order.ongkir;
                     const isCancelled = order.status_bayar === 'CANCELLED';
@@ -523,6 +528,29 @@ export default function Dashboard() {
                 </tbody>
               </table>
             </div>
+
+            {/* Pagination Controls */}
+            {Math.ceil(filteredOrders.length / 5) > 1 && (
+              <div className="flex justify-between items-center mt-3 pt-3 border-t border-[var(--border)] font-['Inter'] text-[12px]">
+                <button
+                  onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="btn-secondary px-3 py-1.5 text-[11px] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center h-[28px]"
+                >
+                  ← Prev
+                </button>
+                <span className="text-[var(--text-secondary)]">
+                  Halaman <span className="text-[var(--text-primary)] font-semibold">{currentPage}</span> dari <span className="text-[var(--text-primary)] font-semibold">{Math.ceil(filteredOrders.length / 5)}</span>
+                </span>
+                <button
+                  onClick={() => setCurrentPage(p => Math.min(p + 1, Math.ceil(filteredOrders.length / 5)))}
+                  disabled={currentPage === Math.ceil(filteredOrders.length / 5)}
+                  className="btn-secondary px-3 py-1.5 text-[11px] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center h-[28px]"
+                >
+                  Next →
+                </button>
+              </div>
+            )}
 
           </div>
 

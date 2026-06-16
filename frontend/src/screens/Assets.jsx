@@ -6,7 +6,7 @@ const ASSETS = [
     id: 1,
     title: 'QRIS',
     category: 'Payment',
-    url: '../../public/images/QRIS.jpeg',
+    url: '../../images/QRIS.jpeg',
     description: 'QRIS Dimsavor (BCA a.n Amara Dimsum)'
   },
   {
@@ -20,7 +20,7 @@ const ASSETS = [
     id: 3,
     title: 'Poster',
     category: 'Marketing',
-    url: '../../public/images/Poster.png',
+    url: '../../images/Poster.png',
     description: 'Poster untuk post'
   }
 ];

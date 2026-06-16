@@ -41,49 +41,59 @@ def list_orders(session_id: Optional[int] = None, status_bayar: Optional[str] = 
 
 @router.post("/")
 def create_order(order: OrderCreate, db = Depends(get_db)):
-    # Insert order
-    order_data = order.model_dump(exclude={"items"})
-    res = db.table("orders").insert(order_data).execute()
-    new_order = res.data[0]
-    id_order = new_order["id_order"]
-    
-    items_data = []
-    for item in order.items:
-        item_dict = item.model_dump()
-        item_dict["id_order"] = id_order
-        items_data.append(item_dict)
+    try:
+        # Insert order
+        order_data = order.model_dump(exclude={"items"})
+        res = db.table("orders").insert(order_data).execute()
+        new_order = res.data[0]
+        id_order = new_order["id_order"]
         
-    if items_data:
-        db.table("order_items").insert(items_data).execute()
-        
-    return new_order
+        items_data = []
+        for item in order.items:
+            item_dict = item.model_dump()
+            item_dict["id_order"] = id_order
+            items_data.append(item_dict)
+            
+        if items_data:
+            db.table("order_items").insert(items_data).execute()
+            
+        return new_order
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Server Error: {str(e)}")
 
 @router.put("/{id_order}")
 def update_order(id_order: int, order: OrderCreate, db = Depends(get_db)):
-    # Verify order exists
-    existing_order = db.table("orders").select("id_order").eq("id_order", id_order).single().execute()
-    if not existing_order.data:
-        raise HTTPException(status_code=404, detail="Order not found")
+    try:
+        # Verify order exists
+        existing_order = db.table("orders").select("id_order").eq("id_order", id_order).single().execute()
+        if not existing_order.data:
+            raise HTTPException(status_code=404, detail="Order not found")
 
-    # Update order details
-    order_data = order.model_dump(exclude={"items", "id_po"}) # don't change session
-    res = db.table("orders").update(order_data).eq("id_order", id_order).execute()
-    updated_order = res.data[0]
-    
-    # Delete old items
-    db.table("order_items").delete().eq("id_order", id_order).execute()
-    
-    # Insert new items
-    items_data = []
-    for item in order.items:
-        item_dict = item.model_dump()
-        item_dict["id_order"] = id_order
-        items_data.append(item_dict)
+        # Update order details
+        order_data = order.model_dump(exclude={"items", "id_po"}) # don't change session
+        res = db.table("orders").update(order_data).eq("id_order", id_order).execute()
+        updated_order = res.data[0]
         
-    if items_data:
-        db.table("order_items").insert(items_data).execute()
+        # Delete old items
+        db.table("order_items").delete().eq("id_order", id_order).execute()
         
-    return updated_order
+        # Insert new items
+        items_data = []
+        for item in order.items:
+            item_dict = item.model_dump()
+            item_dict["id_order"] = id_order
+            items_data.append(item_dict)
+            
+        if items_data:
+            db.table("order_items").insert(items_data).execute()
+            
+        return updated_order
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Server Error: {str(e)}")
 
 @router.get("/{id_order}")
 def get_order(id_order: int, db = Depends(get_db)):

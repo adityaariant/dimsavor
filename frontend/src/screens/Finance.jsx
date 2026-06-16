@@ -1,25 +1,39 @@
-import React, { useState } from 'react';
-import { useNavigate, useOutletContext } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useOutletContext } from 'react-router-dom';
 import { apiFetch } from '../api/client';
+import { useAuth } from '../contexts/AuthContext';
 import ConfirmModal from '../components/ConfirmModal';
 import { formatRupiah } from '../utils/format';
 
 export default function Finance() {
   const { selectedSession: session, refreshSessions, sessionData, refreshSessionData } = useOutletContext();
+  const { displayName } = useAuth();
   
   const [newExpense, setNewExpense] = useState({
     nama_bahan: '',
     nominal: '',
-    dibayar_oleh: 'Adit'
+    dibayar_oleh: displayName || 'Adit'
   });
+
+  useEffect(() => {
+    if (displayName) {
+      setNewExpense(prev => ({ ...prev, dibayar_oleh: displayName }));
+    }
+  }, [displayName]);
   
   const [isCloseModalOpen, setIsCloseModalOpen] = useState(false);
-  const navigate = useNavigate();
 
-  if (sessionData.loading) return <div className="p-8">Loading finance data...</div>;
-  if (!session) return <div className="p-8 text-center text-gray-500 mt-20">Tidak ada sesi PO.</div>;
+  if (sessionData.loading) return (
+    <div className="p-4 md:p-8 flex gap-6">
+      <div className="skeleton h-64 w-1/2"></div>
+      <div className="skeleton h-64 w-1/2"></div>
+    </div>
+  );
+  
+  if (!session) return <div className="p-8 text-center text-[var(--text-secondary)] mt-20 font-['Inter'] text-[13px]">Tidak ada sesi PO.</div>;
 
   const { finance: preview, expenses } = sessionData;
+  const isClosed = session.status === 'Closed';
 
   const handleAddExpense = async () => {
     if (!newExpense.nama_bahan || !newExpense.nominal) return;
@@ -33,8 +47,8 @@ export default function Finance() {
           dibayar_oleh: newExpense.dibayar_oleh
         })
       });
-      setNewExpense({ nama_bahan: '', nominal: '', dibayar_oleh: 'Adit' });
-      await refreshSessionData(); // Reload to update preview live
+      setNewExpense({ nama_bahan: '', nominal: '', dibayar_oleh: displayName || 'Adit' });
+      await refreshSessionData(); 
     } catch (err) {
       alert("Gagal menambah pengeluaran: " + err.message);
     }
@@ -53,84 +67,83 @@ export default function Finance() {
     try {
       await apiFetch(`/finance/close?session_id=${session.id_po}`, { method: 'POST' });
       setIsCloseModalOpen(false);
-      refreshSessions(); // tell layout to refetch so it's closed globally
+      refreshSessions(); 
     } catch (err) {
       alert("Gagal menutup batch: " + err.message);
       setIsCloseModalOpen(false);
     }
   };
 
-  if (!session) return <div className="p-8 text-center text-gray-500 mt-20">Tidak ada sesi PO.</div>;
-
-  const isClosed = session.status === 'Closed';
-
   const aditTotal = expenses.filter(e => e.dibayar_oleh === 'Adit').reduce((s, e) => s + e.nominal, 0);
   const kilaTotal = expenses.filter(e => e.dibayar_oleh === 'Kila').reduce((s, e) => s + e.nominal, 0);
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
-      <div className="flex justify-between items-center mb-6">
+    <div className="max-w-6xl mx-auto space-y-[20px]">
+      <div className="flex justify-between items-center mb-2">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Finance & Profit Split</h1>
-          <p className="text-gray-500">PO-{session.id_po} ({session.status})</p>
+          <h1 className="text-[24px] font-semibold text-[var(--text-primary)] font-['Space_Grotesk']">
+            Finance & Profit Split 
+            <span className="text-[var(--text-secondary)] font-normal text-[18px] ml-2">(PO-{session.id_po})</span>
+          </h1>
         </div>
         {isClosed && (
-          <span className="bg-gray-200 text-gray-800 px-4 py-2 rounded-full font-medium text-sm">
-            🔒 Batch Sudah Ditutup
+          <span className="badge badge-pending">
+            🔒 Batch Ditutup
           </span>
         )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+      <div className="flex flex-col lg:flex-row gap-[20px] items-start">
         {/* Expense Tracker */}
-        <div className="bg-white rounded-lg shadow-sm border p-6">
-          <h2 className="text-lg font-bold text-gray-800 mb-4">Modal / Pengeluaran</h2>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left mb-4">
-              <thead className="bg-gray-50 text-gray-500 border-b">
+        <div className="card w-full lg:w-1/2">
+          <div className="card-header">Pengeluaran</div>
+          
+          <div className="overflow-x-auto mb-4 border border-[var(--border)] rounded-[6px]">
+            <table className="min-w-full text-left border-collapse">
+              <thead>
                 <tr>
-                  <th className="py-2 px-3 font-medium">Nama Bahan</th>
-                  <th className="py-2 px-3 font-medium">Nominal</th>
-                  <th className="py-2 px-3 font-medium">Dibayar</th>
-                  {!isClosed && <th className="py-2 px-3 font-medium text-right">Aksi</th>}
+                  <th className="table-header-cell">Nama Bahan</th>
+                  <th className="table-header-cell">Nominal</th>
+                  <th className="table-header-cell">Dibayar</th>
+                  {!isClosed && <th className="table-header-cell text-right w-[40px]"></th>}
                 </tr>
               </thead>
-              <tbody className="divide-y">
+              <tbody>
                 {expenses.map(exp => (
-                  <tr key={exp.id_expense} className="hover:bg-gray-50 transition-colors">
-                    <td className="py-3 px-3 text-gray-900">{exp.nama_bahan}</td>
-                    <td className="py-3 px-3 text-gray-900">{formatRupiah(exp.nominal)}</td>
-                    <td className="py-3 px-3 text-gray-600">{exp.dibayar_oleh}</td>
+                  <tr key={exp.id_expense} className="table-row">
+                    <td className="table-cell">{exp.nama_bahan}</td>
+                    <td className="table-cell font-['JetBrains_Mono'] text-[12px]">{formatRupiah(exp.nominal)}</td>
+                    <td className="table-cell text-[var(--text-secondary)]">{exp.dibayar_oleh}</td>
                     {!isClosed && (
-                      <td className="py-3 px-3 text-right">
-                        <button onClick={() => handleDeleteExpense(exp.id_expense)} className="text-red-500 hover:text-red-700">Hapus</button>
+                      <td className="table-cell text-right">
+                        <button onClick={() => handleDeleteExpense(exp.id_expense)} className="text-[var(--status-cancelled)] hover:underline text-[12px]">Hapus</button>
                       </td>
                     )}
                   </tr>
                 ))}
                 {!isClosed && (
-                  <tr className="bg-orange-50/50">
-                    <td className="py-2 px-3">
+                  <tr className="bg-[var(--bg-elevated)] border-t border-[var(--border)]">
+                    <td className="table-cell py-2">
                       <input 
                         type="text" 
                         placeholder="Bahan..." 
-                        className="w-full border rounded px-2 py-1 text-sm focus:outline-none focus:border-orange-500"
+                        className="form-input h-[28px] text-[12px]"
                         value={newExpense.nama_bahan}
                         onChange={e => setNewExpense({...newExpense, nama_bahan: e.target.value})}
                       />
                     </td>
-                    <td className="py-2 px-3">
+                    <td className="table-cell py-2">
                       <input 
                         type="number" 
                         placeholder="Rp..." 
-                        className="w-full border rounded px-2 py-1 text-sm focus:outline-none focus:border-orange-500"
+                        className="form-input h-[28px] text-[12px] font-['JetBrains_Mono']"
                         value={newExpense.nominal}
                         onChange={e => setNewExpense({...newExpense, nominal: e.target.value})}
                       />
                     </td>
-                    <td className="py-2 px-3">
+                    <td className="table-cell py-2">
                       <select 
-                        className="w-full border rounded px-2 py-1 text-sm focus:outline-none focus:border-orange-500"
+                        className="form-select h-[28px] text-[12px]"
                         value={newExpense.dibayar_oleh}
                         onChange={e => setNewExpense({...newExpense, dibayar_oleh: e.target.value})}
                       >
@@ -138,66 +151,67 @@ export default function Finance() {
                         <option>Kila</option>
                       </select>
                     </td>
-                    <td className="py-2 px-3 text-right">
-                      <button onClick={handleAddExpense} className="text-orange-600 font-medium hover:underline">Simpan</button>
+                    <td className="table-cell text-right py-2">
+                      <button onClick={handleAddExpense} className="text-[var(--amber)] font-medium hover:underline text-[12px] whitespace-nowrap">Simpan</button>
                     </td>
+                  </tr>
+                )}
+                {expenses.length === 0 && (
+                  <tr className="table-row">
+                    <td colSpan="4" className="table-cell text-center text-[var(--text-secondary)]">Belum ada pengeluaran.</td>
                   </tr>
                 )}
               </tbody>
             </table>
           </div>
           
-          <div className="bg-gray-50 p-4 rounded-lg border text-sm space-y-1">
-            <div className="flex justify-between text-gray-600"><span>Adit total:</span> <span>{formatRupiah(aditTotal)}</span></div>
-            <div className="flex justify-between text-gray-600"><span>Kila total:</span> <span>{formatRupiah(kilaTotal)}</span></div>
-            <div className="flex justify-between font-bold text-gray-900 border-t pt-2 mt-2"><span>Total Modal:</span> <span>{formatRupiah(preview?.total_modal || 0)}</span></div>
+          <div className="bg-[var(--bg-muted)] p-[12px] rounded-[6px] border border-[var(--border)] font-['Inter'] text-[13px] space-y-[4px]">
+            <div className="flex justify-between text-[var(--text-secondary)]"><span>Adit total:</span> <span className="font-['JetBrains_Mono'] text-[12px] text-[var(--text-primary)]">{formatRupiah(aditTotal)}</span></div>
+            <div className="flex justify-between text-[var(--text-secondary)]"><span>Kila total:</span> <span className="font-['JetBrains_Mono'] text-[12px] text-[var(--text-primary)]">{formatRupiah(kilaTotal)}</span></div>
+            <div className="flex justify-between font-medium text-[var(--text-primary)] border-t border-[var(--border)] pt-[8px] mt-[8px]"><span>Total Modal:</span> <span className="font-['JetBrains_Mono'] text-[12px]">{formatRupiah(preview?.total_modal || 0)}</span></div>
           </div>
         </div>
 
         {/* Profit Split Preview */}
-        <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white rounded-lg shadow-lg border border-gray-700 p-6 relative overflow-hidden">
-          {/* Decorative circles */}
-          <div className="absolute -right-10 -top-10 w-40 h-40 bg-orange-500 opacity-10 rounded-full blur-2xl"></div>
-          <div className="absolute -left-10 -bottom-10 w-40 h-40 bg-blue-500 opacity-10 rounded-full blur-2xl"></div>
-
-          <h2 className="text-lg font-bold mb-6 flex items-center">
-            <span className="bg-orange-500/20 text-orange-400 p-1.5 rounded mr-3">💰</span>
-            Kalkulasi Bagi Hasil
-          </h2>
+        <div className="card w-full lg:w-1/2 lg:sticky top-[20px]">
+          <div className="card-header">Kalkulasi Bagi Hasil</div>
           
-          <div className="space-y-3 text-sm text-gray-300">
-            <div className="flex justify-between">
+          <div className="space-y-[8px] font-['Inter'] text-[14px]">
+            <div className="flex justify-between text-[var(--text-secondary)]">
               <span>Total Pendapatan (PAID)</span>
-              <span className="font-medium text-white">{formatRupiah(preview?.total_revenue || 0)}</span>
+              <span className="font-medium text-[var(--text-primary)] font-['JetBrains_Mono'] text-[13px]">{formatRupiah(preview?.total_revenue || 0)}</span>
             </div>
-            <div className="flex justify-between text-red-300">
+            <div className="flex justify-between text-[var(--status-cancelled)]">
               <span>Total Modal</span>
-              <span>- {formatRupiah(preview?.total_modal || 0)}</span>
+              <span className="font-['JetBrains_Mono'] text-[13px]">- {formatRupiah(preview?.total_modal || 0)}</span>
             </div>
-            <div className="flex justify-between font-bold text-xl text-green-400 border-t border-gray-700 pt-3 mt-3">
-              <span>Laba Bersih</span>
-              <span>{formatRupiah(preview?.laba_bersih || 0)}</span>
+            
+            <div className="flex justify-between font-bold border-t border-[var(--border)] pt-[16px] mt-[16px]">
+              <span className="text-[var(--text-primary)]">Laba Bersih</span>
+              <span className="text-[32px] text-[var(--amber)] font-['Space_Grotesk'] leading-none">
+                {formatRupiah(preview?.laba_bersih || 0)}
+              </span>
             </div>
           </div>
 
-          <div className="mt-8 space-y-4">
-            <div className="bg-gray-800/50 p-4 rounded border border-gray-700">
-              <div className="text-gray-400 text-xs mb-1">Porsi Adit</div>
+          <div className="mt-[24px] space-y-[12px]">
+            <div className="bg-[var(--bg-elevated)] p-[16px] rounded-[6px] border border-[var(--border)]">
+              <div className="text-[var(--text-secondary)] text-[11px] uppercase tracking-wider mb-[4px]">Porsi Adit</div>
               <div className="flex justify-between items-end">
-                <div className="text-xs text-gray-500">
-                  {formatRupiah(aditTotal)} <span className="mx-1">(modal)</span> + {formatRupiah((preview?.laba_bersih || 0) / 2)} <span className="mx-1">(laba ÷ 2)</span>
+                <div className="text-[11px] text-[var(--text-disabled)] font-['JetBrains_Mono']">
+                  {formatRupiah(aditTotal)} <span className="font-['Inter']">(modal)</span> + {formatRupiah((preview?.laba_bersih || 0) / 2)} <span className="font-['Inter']">(laba ÷ 2)</span>
                 </div>
-                <div className="font-bold text-lg text-white">{formatRupiah(preview?.adit_receives || 0)}</div>
+                <div className="font-semibold text-[24px] text-[var(--text-primary)] font-['Space_Grotesk'] leading-none">{formatRupiah(preview?.adit_receives || 0)}</div>
               </div>
             </div>
 
-            <div className="bg-gray-800/50 p-4 rounded border border-gray-700">
-              <div className="text-gray-400 text-xs mb-1">Porsi Kila</div>
+            <div className="bg-[var(--bg-elevated)] p-[16px] rounded-[6px] border border-[var(--border)]">
+              <div className="text-[var(--text-secondary)] text-[11px] uppercase tracking-wider mb-[4px]">Porsi Kila</div>
               <div className="flex justify-between items-end">
-                <div className="text-xs text-gray-500">
-                  {formatRupiah(kilaTotal)} <span className="mx-1">(modal)</span> + {formatRupiah((preview?.laba_bersih || 0) / 2)} <span className="mx-1">(laba ÷ 2)</span>
+                <div className="text-[11px] text-[var(--text-disabled)] font-['JetBrains_Mono']">
+                  {formatRupiah(kilaTotal)} <span className="font-['Inter']">(modal)</span> + {formatRupiah((preview?.laba_bersih || 0) / 2)} <span className="font-['Inter']">(laba ÷ 2)</span>
                 </div>
-                <div className="font-bold text-lg text-white">{formatRupiah(preview?.kila_receives || 0)}</div>
+                <div className="font-semibold text-[24px] text-[var(--text-primary)] font-['Space_Grotesk'] leading-none">{formatRupiah(preview?.kila_receives || 0)}</div>
               </div>
             </div>
           </div>
@@ -205,9 +219,9 @@ export default function Finance() {
           {!isClosed && (
             <button 
               onClick={() => setIsCloseModalOpen(true)}
-              className="mt-8 w-full py-3 bg-orange-600 hover:bg-orange-500 text-white font-bold rounded shadow-lg transition-colors"
+              className="btn-destructive w-full mt-[24px]"
             >
-              Close Batch & Finalisasi →
+              Close Batch & Finalisasi
             </button>
           )}
         </div>

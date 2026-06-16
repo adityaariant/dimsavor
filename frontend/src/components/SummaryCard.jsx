@@ -2,10 +2,10 @@ import React from 'react';
 
 export default function SummaryCard({ title, value, subLabel }) {
   return (
-    <div className="bg-white p-6 rounded-lg border shadow-sm">
-      <h3 className="text-sm font-medium text-gray-500">{title}</h3>
-      <p className="mt-2 text-3xl font-bold text-gray-900">{value}</p>
-      {subLabel && <p className="mt-1 text-sm text-gray-500">{subLabel}</p>}
+    <div className="card p-[20px]">
+      <h3 className="text-[12px] uppercase tracking-wider text-[var(--text-secondary)] font-medium font-['Inter'] mb-[8px]">{title}</h3>
+      <p className="text-[32px] font-bold text-[var(--text-primary)] font-['Space_Grotesk'] leading-none">{value}</p>
+      {subLabel && <p className="mt-[8px] text-[13px] text-[var(--text-disabled)] font-['Inter']">{subLabel}</p>}
     </div>
   );
 }

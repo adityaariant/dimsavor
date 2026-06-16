@@ -98,20 +98,20 @@ def get_order(id_order: int, db = Depends(get_db)):
 def toggle_pay(id_order: int, db = Depends(get_db)):
     order = db.table("orders").select("status_bayar").eq("id_order", id_order).single().execute()
     new_status = "PAID" if order.data["status_bayar"] == "UNPAID" else "UNPAID"
-    res = db.table("orders").update({"status_bayar": new_status}).eq("id_order", id_order).execute()
-    return res.data[0]
+    db.table("orders").update({"status_bayar": new_status}).eq("id_order", id_order).execute()
+    return {"id_order": id_order, "status_bayar": new_status}
 
 @router.patch("/{id_order}/send")
 def toggle_send(id_order: int, db = Depends(get_db)):
     order = db.table("orders").select("status_kirim").eq("id_order", id_order).single().execute()
     new_status = "SENT" if order.data["status_kirim"] == "PENDING" else "PENDING"
-    res = db.table("orders").update({"status_kirim": new_status}).eq("id_order", id_order).execute()
-    return res.data[0]
+    db.table("orders").update({"status_kirim": new_status}).eq("id_order", id_order).execute()
+    return {"id_order": id_order, "status_kirim": new_status}
 
 @router.patch("/{id_order}/cancel")
 def cancel_order(id_order: int, db = Depends(get_db)):
-    res = db.table("orders").update({
+    db.table("orders").update({
         "status_bayar": "CANCELLED",
         "status_kirim": "CANCELLED"
     }).eq("id_order", id_order).execute()
-    return res.data[0]
+    return {"id_order": id_order, "status_bayar": "CANCELLED", "status_kirim": "CANCELLED"}

@@ -4,22 +4,33 @@ import { apiFetch } from '../api/client';
 import SummaryCard from '../components/SummaryCard';
 import ConfirmModal from '../components/ConfirmModal';
 import { formatRupiah } from '../utils/format';
+import { Lock } from 'lucide-react';
 
 export default function Dashboard() {
   const { selectedSession: session, isReadOnly, refreshSessions, sessionData } = useOutletContext();
   const [isCloseModalOpen, setIsCloseModalOpen] = useState(false);
   const navigate = useNavigate();
 
-  if (sessionData.loading) return <div className="p-8">Loading dashboard...</div>;
+  if (sessionData.loading) return (
+    <div className="p-4 md:p-8">
+      <div className="skeleton h-8 w-1/4 mb-6"></div>
+      <div className="flex gap-4 mb-6">
+        <div className="skeleton h-24 w-1/3"></div>
+        <div className="skeleton h-24 w-1/3"></div>
+        <div className="skeleton h-24 w-1/3"></div>
+      </div>
+      <div className="skeleton h-64 w-full"></div>
+    </div>
+  );
 
   if (!session) {
     return (
-      <div className="p-8 text-center max-w-lg mx-auto mt-20 bg-white rounded-lg shadow-sm border p-12">
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">Belum ada sesi PO aktif</h2>
-        <p className="text-gray-600 mb-8">Buat sesi PO baru terlebih dahulu untuk mulai menerima pesanan.</p>
+      <div className="p-8 text-center max-w-lg mx-auto mt-20 card p-[40px]">
+        <h2 className="text-[20px] font-bold text-[var(--text-primary)] mb-[12px] font-['Space_Grotesk']">Belum ada sesi PO aktif</h2>
+        <p className="text-[14px] text-[var(--text-secondary)] mb-[24px] font-['Inter']">Buat sesi PO baru terlebih dahulu untuk mulai menerima pesanan.</p>
         <button
           onClick={() => navigate('/sessions')}
-          className="bg-orange-600 text-white px-6 py-2 rounded shadow hover:bg-orange-700 transition-colors"
+          className="btn-primary"
         >
           Ke Manajemen Sesi
         </button>
@@ -41,23 +52,6 @@ export default function Dashboard() {
     }
   };
 
-
-  if (!session) {
-    return (
-      <div className="p-8 text-center max-w-lg mx-auto mt-20 bg-white rounded-lg shadow-sm border p-12">
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">Belum ada sesi PO aktif</h2>
-        <p className="text-gray-600 mb-8">Buat sesi PO baru terlebih dahulu untuk mulai menerima pesanan.</p>
-        <button
-          onClick={() => navigate('/sessions')}
-          className="bg-orange-600 text-white px-6 py-2 rounded shadow hover:bg-orange-700 transition-colors"
-        >
-          Ke Manajemen Sesi
-        </button>
-      </div>
-    );
-  }
-
-  // Analytics Calculations
   const unpaidOrders = orders.filter(o => o.status_bayar === 'UNPAID');
   const hasUnpaid = unpaidOrders.length > 0;
   
@@ -67,21 +61,19 @@ export default function Dashboard() {
     return sum + subtotal + order.ongkir;
   }, 0);
 
-  // Approximate production counting (simple sum for summary)
   const totalDimsum = items.reduce((count, item) => {
     const name = item.nama_produk || '';
     const qty = item.qty || 1;
     if (name.includes('Dimsum') || name.includes('Bacar')) {
       return count + qty;
     } else if (name === 'BSweet') {
-      return count + (2 * qty); // 1 Mentai + 1 Bacar
+      return count + (2 * qty); 
     } else if (name === 'BAdil') {
-      return count + (3 * qty); // 1 Mentai + 2 Bacar
+      return count + (3 * qty); 
     }
     return count;
   }, 0);
 
-  // Group by date for Production Board
   const boardDates = {};
   orders.filter(o => o.status_bayar !== 'CANCELLED').forEach(order => {
     const dateText = order.delivery_slots?.jadwal_teks || 'Tanpa Jadwal';
@@ -97,41 +89,42 @@ export default function Dashboard() {
   });
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
+    <div className="max-w-6xl mx-auto space-y-[24px]">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-500">Sesi Aktif: PO-{session.id_po}</p>
+          <h1 className="text-[24px] font-semibold text-[var(--text-primary)] font-['Space_Grotesk']">
+            Dashboard
+            <span className="text-[var(--text-secondary)] font-normal text-[18px] ml-2">(PO-{session.id_po})</span>
+          </h1>
         </div>
         {!isReadOnly && (
-          <div>
-            <div className="relative group inline-block">
-              <button
-                onClick={() => setIsCloseModalOpen(true)}
-                disabled={hasUnpaid}
-                className={`px-4 py-2 rounded-md font-medium shadow-sm transition-colors ${
-                  hasUnpaid 
-                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
-                    : 'bg-red-600 text-white hover:bg-red-700'
-                }`}
-              >
-                Close Batch ▼
-              </button>
-              {hasUnpaid && (
-                <div className="absolute top-full right-0 mt-2 w-48 p-2 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                  Ada pesanan UNPAID. Lunasin dulu sebelum tutup batch.
-                </div>
-              )}
-            </div>
+          <div className="relative group inline-block">
+            <button
+              onClick={() => setIsCloseModalOpen(true)}
+              disabled={hasUnpaid}
+              className={`flex items-center gap-[6px] h-[36px] px-[16px] rounded-[6px] font-['Inter'] font-medium text-[13px] transition-colors ${
+                hasUnpaid 
+                  ? 'bg-[var(--bg-muted)] text-[var(--text-disabled)] cursor-not-allowed border border-[var(--border)]' 
+                  : 'bg-[var(--status-cancelled)] text-white hover:bg-red-700'
+              }`}
+            >
+              <Lock className="w-4 h-4" />
+              Close Batch
+            </button>
+            {hasUnpaid && (
+              <div className="absolute top-full right-0 mt-2 w-48 p-[12px] bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-primary)] text-[12px] rounded-[6px] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-xl">
+                Ada pesanan UNPAID. Lunasin dulu sebelum tutup batch.
+              </div>
+            )}
           </div>
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-[16px]">
         <SummaryCard 
-          title="Produksi" 
+          title="Produksi (Box)" 
           value={`${totalDimsum} / ${session.kuota_maksimal}`} 
-          subLabel="box dimsum" 
+          subLabel="Total box dimsum + bacar" 
         />
         <SummaryCard 
           title="Tagihan UNPAID" 
@@ -141,55 +134,50 @@ export default function Dashboard() {
         <SummaryCard 
           title="Est. Laba Bersih" 
           value={formatRupiah(finance?.laba_bersih || 0)} 
-          subLabel="(dari PAID)" 
+          subLabel="Dari order yang sudah PAID" 
         />
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
-        <div className="p-4 border-b bg-gray-50">
-          <h3 className="font-medium text-gray-900">Production Board</h3>
+      <div className="card overflow-x-auto p-0">
+        <div className="card-header border-b border-[var(--border)] p-[16px]">
+          Production Board
         </div>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200 text-sm">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
-                  Pelanggan
+        <table className="min-w-full text-left border-collapse">
+          <thead>
+            <tr>
+              <th className="table-header-cell border-b border-[var(--border)]">Pelanggan</th>
+              {Object.keys(boardDates).map(date => (
+                <th key={date} className="table-header-cell border-b border-l border-[var(--border)] text-center">
+                  {date}
                 </th>
-                {Object.keys(boardDates).map(date => (
-                  <th key={date} className="px-6 py-3 text-center font-medium text-gray-500 uppercase tracking-wider border-l">
-                    {date}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {/* Combine all unique customers for the rows */}
-              {Array.from(new Set(orders.filter(o => o.status_bayar !== 'CANCELLED').map(o => o.nama_pelanggan))).map(customer => (
-                <tr key={customer} className="hover:bg-orange-50 cursor-pointer" onClick={() => navigate('/orders')}>
-                  <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
-                    {customer}
-                  </td>
-                  {Object.keys(boardDates).map(date => {
-                    const found = boardDates[date].find(d => d.nama_pelanggan === customer);
-                    return (
-                      <td key={date} className="px-6 py-4 whitespace-nowrap text-center text-gray-500 border-l">
-                        {found ? found.codes : '-'}
-                      </td>
-                    );
-                  })}
-                </tr>
               ))}
-              {orders.filter(o => o.status_bayar !== 'CANCELLED').length === 0 && (
-                <tr>
-                  <td colSpan={Object.keys(boardDates).length + 1} className="px-6 py-8 text-center text-gray-500">
-                    Belum ada data produksi untuk sesi ini.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-[var(--border)]">
+            {Array.from(new Set(orders.filter(o => o.status_bayar !== 'CANCELLED').map(o => o.nama_pelanggan))).map(customer => (
+              <tr key={customer} className="table-row cursor-pointer" onClick={() => navigate('/orders')}>
+                <td className="table-cell font-medium text-[var(--text-secondary)]">
+                  {customer}
+                </td>
+                {Object.keys(boardDates).map(date => {
+                  const found = boardDates[date].find(d => d.nama_pelanggan === customer);
+                  return (
+                    <td key={date} className="table-cell text-center border-l border-[var(--border)] text-[var(--text-primary)] font-['JetBrains_Mono'] text-[13px]">
+                      {found ? found.codes : <span className="text-[var(--text-disabled)]">-</span>}
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+            {orders.filter(o => o.status_bayar !== 'CANCELLED').length === 0 && (
+              <tr className="table-row">
+                <td colSpan={Object.keys(boardDates).length + 1} className="table-cell text-center py-[32px] text-[var(--text-secondary)]">
+                  Belum ada data produksi untuk sesi ini.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
 
       <ConfirmModal

@@ -20,59 +20,69 @@ export default function OrderDrawer({ order, items, isOpen, onClose, onCancelOrd
 
   return (
     <>
-      <div className="fixed inset-0 z-40 bg-black bg-opacity-30 transition-opacity" onClick={onClose} />
-      <div className="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-white shadow-xl flex flex-col transform transition-transform">
-        <div className="p-4 border-b flex justify-between items-center bg-gray-50">
-          <h2 className="text-lg font-bold text-gray-800">Pesanan #{order.id_order} — {order.nama_pelanggan}</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-800 text-2xl leading-none">&times;</button>
+      <div className="fixed inset-0 z-40 bg-black/80 backdrop-blur-sm transition-opacity" onClick={onClose} />
+      <div className="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-[var(--bg-surface)] border-l border-[var(--border)] shadow-2xl flex flex-col transform transition-transform">
+        <div className="p-[20px] border-b border-[var(--border)] flex justify-between items-center bg-[var(--bg-elevated)]">
+          <h2 className="text-[18px] font-bold text-[var(--text-primary)] font-['Space_Grotesk']">
+            Pesanan #{order.id_order} — {order.nama_pelanggan}
+          </h2>
+          <button onClick={onClose} className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-2xl leading-none">&times;</button>
         </div>
         
         {!isEditMode ? (
           <>
-            <div className="flex-1 overflow-y-auto p-6 space-y-6 text-sm">
-              <div className="space-y-3 bg-gray-50 p-4 rounded-lg border">
-                <div className="grid grid-cols-3 text-gray-500"><span className="col-span-1">Alamat:</span> <span className="col-span-2 text-gray-900 font-medium">{order.alamat}</span></div>
-                <div className="grid grid-cols-3 text-gray-500"><span className="col-span-1">Area:</span> <span className="col-span-2 text-gray-900">{order.area_tag || '-'}</span></div>
-                <div className="grid grid-cols-3 text-gray-500"><span className="col-span-1">Jadwal:</span> <span className="col-span-2 text-gray-900">{order.delivery_slots?.jadwal_teks || order.jadwal_kirim_request || 'Tanpa Jadwal'}</span></div>
-                <div className="grid grid-cols-3 text-gray-500"><span className="col-span-1">Metode:</span> <span className="col-span-2 text-gray-900">{order.metode_bayar || 'QRIS'}</span></div>
-                <div className="grid grid-cols-3 text-gray-500"><span className="col-span-1">Ongkir:</span> <span className="col-span-2 text-gray-900">{formatRupiah(order.ongkir)} <span className="text-xs text-gray-400">({order.ongkir_rule || '-'})</span></span></div>
+            <div className="flex-1 overflow-y-auto p-[20px] space-y-[24px] text-[13px] font-['Inter']">
+              <div className="space-y-[8px] bg-[var(--bg-muted)] p-[16px] rounded-[6px] border border-[var(--border)]">
+                <div className="grid grid-cols-3 text-[var(--text-secondary)]"><span className="col-span-1">Alamat:</span> <span className="col-span-2 text-[var(--text-primary)] font-medium">{order.alamat}</span></div>
+                <div className="grid grid-cols-3 text-[var(--text-secondary)]"><span className="col-span-1">Area:</span> <span className="col-span-2 text-[var(--text-primary)]">{order.area_tag || '-'}</span></div>
+                <div className="grid grid-cols-3 text-[var(--text-secondary)]"><span className="col-span-1">Jadwal:</span> <span className="col-span-2 text-[var(--text-primary)]">{order.delivery_slots?.jadwal_teks || order.jadwal_kirim_request || 'Tanpa Jadwal'}</span></div>
+                <div className="grid grid-cols-3 text-[var(--text-secondary)]"><span className="col-span-1">Metode:</span> <span className="col-span-2 text-[var(--text-primary)]">{order.metode_bayar || 'QRIS'}</span></div>
+                <div className="grid grid-cols-3 text-[var(--text-secondary)]">
+                  <span className="col-span-1">Ongkir:</span> 
+                  <span className="col-span-2 text-[var(--text-primary)] font-['JetBrains_Mono'] text-[12px]">
+                    {formatRupiah(order.ongkir)} <span className="text-[11px] text-[var(--text-disabled)] font-['Inter']">({order.ongkir_rule || '-'})</span>
+                  </span>
+                </div>
               </div>
 
-              <div className="border-t pt-4">
+              <div>
                 <table className="w-full">
-                  <tbody>
+                  <tbody className="divide-y divide-[var(--border)]">
                     {items.map((item, idx) => (
-                      <tr key={idx} className="border-b last:border-0 border-gray-100">
-                        <td className="py-2 text-gray-800 font-medium">
+                      <tr key={idx} className="">
+                        <td className="py-[12px] text-[var(--text-primary)] font-medium">
                           {item.nama_produk} 
-                          {item.topping && <div className="text-xs text-gray-500 font-normal">Topping: {item.topping}</div>}
+                          {item.topping && <div className="text-[11px] text-[var(--text-secondary)] font-normal mt-[4px]">Topping: {item.topping}</div>}
                         </td>
-                        <td className="py-2 text-center text-gray-600">x{item.qty}</td>
-                        <td className="py-2 text-right text-gray-800">{formatRupiah(item.subtotal)}</td>
+                        <td className="py-[12px] text-center text-[var(--text-secondary)] font-['JetBrains_Mono'] text-[12px]">x{item.qty}</td>
+                        <td className="py-[12px] text-right text-[var(--text-primary)] font-['JetBrains_Mono'] text-[12px]">{formatRupiah(item.subtotal)}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
 
-              <div className="border-t pt-4 space-y-2 text-right">
-                <div className="flex justify-between text-gray-600"><span>Subtotal:</span> <span>{formatRupiah(subtotal)}</span></div>
-                <div className="flex justify-between text-gray-600"><span>Ongkir:</span> <span>{formatRupiah(order.ongkir)}</span></div>
-                <div className="flex justify-between font-bold text-lg text-gray-900 mt-2 pt-2 border-t border-gray-200"><span>Total:</span> <span className="text-orange-600">{formatRupiah(total)}</span></div>
+              <div className="border-t border-[var(--border)] pt-[16px] space-y-[8px] text-right">
+                <div className="flex justify-between text-[var(--text-secondary)]"><span>Subtotal:</span> <span className="font-['JetBrains_Mono'] text-[12px]">{formatRupiah(subtotal)}</span></div>
+                <div className="flex justify-between text-[var(--text-secondary)]"><span>Ongkir:</span> <span className="font-['JetBrains_Mono'] text-[12px]">{formatRupiah(order.ongkir)}</span></div>
+                <div className="flex justify-between font-bold text-[18px] text-[var(--text-primary)] font-['Space_Grotesk'] mt-[12px] pt-[12px] border-t border-[var(--border)]">
+                  <span>Total:</span> 
+                  <span className="text-[var(--amber)] leading-none">{formatRupiah(total)}</span>
+                </div>
               </div>
             </div>
 
             {!isReadOnly && order.status_bayar !== 'CANCELLED' && (
-              <div className="p-4 border-t bg-gray-50 flex gap-2">
+              <div className="p-[20px] border-t border-[var(--border)] bg-[var(--bg-elevated)] flex gap-[12px]">
                 <button 
                   onClick={() => setIsEditMode(true)}
-                  className="w-1/2 py-2 bg-white border border-gray-300 text-gray-700 font-medium rounded hover:bg-gray-50 transition-colors"
+                  className="btn-secondary w-1/2"
                 >
                   Edit Pesanan
                 </button>
                 <button 
                   onClick={() => setIsCancelModalOpen(true)}
-                  className="w-1/2 py-2 bg-red-100 text-red-700 font-medium rounded hover:bg-red-200 transition-colors"
+                  className="btn-destructive w-1/2 bg-[var(--status-cancelled)]/10 text-[var(--status-cancelled)] border border-[var(--status-cancelled)] hover:bg-[var(--status-cancelled)]/20"
                 >
                   Batalkan
                 </button>
@@ -80,7 +90,7 @@ export default function OrderDrawer({ order, items, isOpen, onClose, onCancelOrd
             )}
           </>
         ) : (
-          <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
+          <div className="flex-1 overflow-y-auto p-[20px] bg-[var(--bg-surface)]">
             <ReviewForm 
               isEditMode={true}
               session={session}

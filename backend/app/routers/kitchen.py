@@ -1,13 +1,14 @@
 from fastapi import APIRouter, HTTPException, Depends
 from typing import Optional
 from app.database import get_db
+from app.utils.decomposer import decompose_items
 
 router = APIRouter(prefix="/kitchen", tags=["kitchen"])
 
 @router.get("/")
 def get_kitchen_board(session_id: Optional[int] = None, date: Optional[str] = None, db = Depends(get_db)):
-    # Basic fetch for now, will integrate with decomposer utility
-    query = db.table("orders").select("id_order, id_slot, delivery_slots(jadwal_teks)").neq("status_bayar", "CANCELLED")
+    # Fetch orders including nama_pelanggan for grouping on the frontend
+    query = db.table("orders").select("id_order, id_slot, nama_pelanggan, delivery_slots(jadwal_teks)").neq("status_bayar", "CANCELLED")
     if session_id:
         query = query.eq("id_po", session_id)
     orders = query.execute()
@@ -21,9 +22,20 @@ def get_kitchen_board(session_id: Optional[int] = None, date: Optional[str] = No
         
     items = db.table("order_items").select("*").in_("id_order", order_ids).execute()
     
+    # Build bundle map: {bundle_name: [{'nama_produk_komponen', 'qty_komponen'}]}
+    bundle_map = {}
+    for b in bundles.data:
+        b_name = b["nama_bundle"]
+        if b_name not in bundle_map:
+            bundle_map[b_name] = []
+        bundle_map[b_name].append(b)
+        
+    # Decompose items
+    decomposed_items = decompose_items(items.data, bundle_map)
+    
     return {
         "orders": orders.data,
-        "items": items.data,
+        "items": decomposed_items,
         "bundles": bundles.data,
         "aliases": aliases.data
     }

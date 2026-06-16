@@ -170,43 +170,45 @@ export default function ReviewForm({ initialData, session, onDiscard, refreshSes
   const total = subtotal + data.ongkir;
 
   return (
-    <div className="flex flex-col h-full space-y-4">
-      <div className="flex-1 overflow-y-auto space-y-6 pr-2">
+    <div className="flex flex-col h-full">
+      <div className="flex-1 overflow-y-auto space-y-[24px] pr-[8px] hide-scrollbar">
         {/* Identitas */}
         <div>
-          <h3 className="font-semibold text-gray-800 border-b pb-1 mb-3">Identitas Pelanggan</h3>
-          <div className="space-y-3 text-sm">
+          <h3 className="card-header border-b border-[var(--border)] pb-[8px] mb-[12px]">Identitas Pelanggan</h3>
+          <div className="space-y-[12px]">
             <div className="flex items-center">
-              <span className="w-24 text-gray-500">Nama:</span>
+              <span className="w-24 form-label mb-0">Nama:</span>
               <input 
-                className="flex-1 border rounded px-2 py-1" 
+                className="form-input flex-1 h-[32px] text-[13px]" 
                 value={data.nama_pelanggan || ''} 
                 onChange={e => setData({...data, nama_pelanggan: e.target.value})} 
               />
             </div>
             <div className="flex items-center">
-              <span className="w-24 text-gray-500">Alamat:</span>
+              <span className="w-24 form-label mb-0">Alamat:</span>
               <input 
-                className="flex-1 border rounded px-2 py-1 mr-2" 
+                className="form-input flex-1 h-[32px] text-[13px] mr-[8px]" 
                 value={data.alamat || ''} 
                 onChange={e => setData({...data, alamat: e.target.value})} 
               />
-              <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs whitespace-nowrap">🏷️ {data.area_tag || 'Lainnya'}</span>
+              <span className="bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-secondary)] px-[8px] py-[4px] rounded-[4px] text-[11px] font-['JetBrains_Mono'] whitespace-nowrap">
+                🏷️ {data.area_tag || 'Lainnya'}
+              </span>
             </div>
             <div className="flex items-start">
-              <span className="w-24 text-gray-500 mt-1">Jadwal:</span>
-              <div className="flex-1 flex flex-col gap-1">
-                <div className="flex gap-2">
+              <span className="w-24 form-label mt-[8px]">Jadwal:</span>
+              <div className="flex-1 flex flex-col gap-[4px]">
+                <div className="flex gap-[8px]">
                   {isCustomSlot ? (
                     <input 
-                      className="flex-1 border rounded px-2 py-1"
+                      className="form-input flex-1 h-[32px] text-[13px]"
                       placeholder="Ketik jadwal baru..."
                       value={customSlotText}
                       onChange={e => setCustomSlotText(e.target.value)}
                     />
                   ) : (
                     <select 
-                      className="flex-1 border rounded px-2 py-1"
+                      className="form-select flex-1 h-[32px] text-[13px]"
                       value={data.matched_slot?.id_slot || ''}
                       onChange={e => {
                         if (e.target.value === "NEW") {
@@ -228,24 +230,26 @@ export default function ReviewForm({ initialData, session, onDiscard, refreshSes
                   {isCustomSlot && (
                     <button 
                       onClick={() => setIsCustomSlot(false)}
-                      className="text-gray-500 hover:text-gray-700 text-xs px-2"
-                    >Batal</button>
+                      className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-[12px] px-[8px] font-medium"
+                    >
+                      Batal
+                    </button>
                   )}
                 </div>
                 {isCustomSlot && (
-                  <p className="text-xs text-orange-600">
+                  <p className="text-[11px] text-[var(--amber)]">
                     Jadwal baru akan otomatis dibuat dan disimpan.
                   </p>
                 )}
               </div>
             </div>
             <div className="flex items-center">
-              <span className="w-24 text-gray-500">Ongkir:</span>
-              <div className="flex-1 flex gap-2 items-center">
-                <span className="font-medium text-gray-500">Rp</span>
+              <span className="w-24 form-label mb-0">Ongkir:</span>
+              <div className="flex-1 flex gap-[8px] items-center">
+                <span className="font-['JetBrains_Mono'] text-[12px] text-[var(--text-secondary)]">Rp</span>
                 <input 
                   type="number"
-                  className={`w-28 border rounded px-2 py-1 text-right ${isCustomOngkir ? 'border-orange-500' : ''}`}
+                  className={`form-input w-[120px] h-[32px] text-right font-['JetBrains_Mono'] text-[13px] ${isCustomOngkir ? 'border-[var(--amber)]' : ''}`}
                   value={data.ongkir}
                   onChange={e => {
                     setIsCustomOngkir(true);
@@ -254,20 +258,21 @@ export default function ReviewForm({ initialData, session, onDiscard, refreshSes
                 />
                 {!isCustomOngkir ? (
                   data.ongkir === 0 ? (
-                    <span className="bg-green-100 text-green-800 px-2 py-0.5 rounded-full text-xs">🟢 Gratis ({data.ongkir_rule})</span>
+                    <span className="badge badge-sent bg-opacity-20 ml-2">🟢 Gratis ({data.ongkir_rule})</span>
                   ) : (
-                    <span className="bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full text-xs">🟡 {data.ongkir_rule}</span>
+                    <span className="badge badge-pending bg-opacity-20 ml-2">🟡 {data.ongkir_rule}</span>
                   )
                 ) : (
                   <>
-                    <span className="bg-orange-100 text-orange-800 px-2 py-0.5 rounded-full text-xs">🟠 Manual</span>
+                    <span className="badge badge-pending bg-opacity-20 ml-2">🟠 Manual</span>
                     <button 
                       onClick={() => {
                         setIsCustomOngkir(false);
-                        // Trigger recalculation on next render
                       }}
-                      className="text-gray-500 hover:text-gray-700 text-xs px-2"
-                    >Reset ke Otomatis</button>
+                      className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-[11px] px-[8px] underline"
+                    >
+                      Reset Otomatis
+                    </button>
                   </>
                 )}
               </div>
@@ -277,93 +282,95 @@ export default function ReviewForm({ initialData, session, onDiscard, refreshSes
 
         {/* Item Pesanan */}
         <div>
-          <h3 className="font-semibold text-gray-800 border-b pb-1 mb-3">Item Pesanan</h3>
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-2 py-1 text-left font-medium">Produk</th>
-                <th className="px-2 py-1 text-center font-medium">Qty</th>
-                <th className="px-2 py-1 text-left font-medium">Topping</th>
-                <th className="px-2 py-1 text-right font-medium">Subtotal</th>
-                <th className="px-2 py-1"></th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {data.items.map((item, idx) => (
-                <tr key={idx} className={item._unmatched ? 'bg-red-50' : ''}>
-                  <td className="px-2 py-2">
-                    {item._unmatched ? (
-                      <div className="flex flex-col">
-                        <span className="text-red-600 font-medium">⚠️ "{data.unmatched_tokens?.[0] || 'Unmatched'}"</span>
-                        <select 
-                          className="mt-1 text-xs border rounded p-1"
-                          onChange={e => handleUnmatchedResolve(idx, e.target.value)}
-                          defaultValue=""
-                        >
-                          <option value="" disabled>Pilih Produk...</option>
-                          {aliases.map(a => <option key={a} value={a}>{a}</option>)}
-                        </select>
-                      </div>
-                    ) : (
-                      <input className="w-full border rounded px-1" value={item.nama_produk} readOnly />
-                    )}
-                  </td>
-                  <td className="px-2 py-2 w-16 text-center">
-                    <input className="w-full border rounded px-1 text-center" type="number" min="1" value={item.qty || 1} onChange={e => {
-                      const newItems = [...data.items];
-                      newItems[idx].qty = Number(e.target.value);
-                      setData({...data, items: newItems});
-                    }} />
-                  </td>
-                  <td className="px-2 py-2">
-                    {!item._unmatched && (
-                      <input 
-                        className="w-full border rounded px-1" 
-                        value={item.topping || ''} 
-                        onChange={e => {
-                          const newItems = [...data.items];
-                          newItems[idx].topping = e.target.value;
-                          setData({...data, items: newItems});
-                        }} 
-                        placeholder="Cth: Oreo 2k"
-                      />
-                    )}
-                  </td>
-                  <td className="px-2 py-2 text-right">
-                    {!item._unmatched && formatRupiah(item.subtotal)}
-                  </td>
-                  <td className="px-2 py-2 text-center text-gray-400 hover:text-red-500 cursor-pointer" onClick={() => handleItemDelete(idx)}>
-                    <Trash2 className="w-4 h-4 mx-auto" />
-                  </td>
+          <h3 className="card-header border-b border-[var(--border)] pb-[8px] mb-[12px]">Item Pesanan</h3>
+          <div className="border border-[var(--border)] rounded-[6px] overflow-hidden">
+            <table className="min-w-full text-left">
+              <thead className="bg-[var(--bg-elevated)] border-b border-[var(--border)]">
+                <tr>
+                  <th className="px-[12px] py-[8px] text-[12px] font-medium text-[var(--text-secondary)]">Produk</th>
+                  <th className="px-[12px] py-[8px] text-[12px] font-medium text-[var(--text-secondary)] text-center w-[60px]">Qty</th>
+                  <th className="px-[12px] py-[8px] text-[12px] font-medium text-[var(--text-secondary)]">Topping</th>
+                  <th className="px-[12px] py-[8px] text-[12px] font-medium text-[var(--text-secondary)] text-right">Subtotal</th>
+                  <th className="px-[12px] py-[8px] w-[40px]"></th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-[var(--border)]">
+                {data.items.map((item, idx) => (
+                  <tr key={idx} className={item._unmatched ? 'bg-[var(--status-cancelled)]/10' : ''}>
+                    <td className="px-[12px] py-[8px]">
+                      {item._unmatched ? (
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[var(--status-cancelled)] font-medium text-[12px]">⚠️ "{data.unmatched_tokens?.[0] || 'Unmatched'}"</span>
+                          <select 
+                            className="form-select h-[28px] text-[11px] p-1"
+                            onChange={e => handleUnmatchedResolve(idx, e.target.value)}
+                            defaultValue=""
+                          >
+                            <option value="" disabled>Pilih Produk...</option>
+                            {aliases.map(a => <option key={a} value={a}>{a}</option>)}
+                          </select>
+                        </div>
+                      ) : (
+                        <input className="form-input h-[28px] text-[12px] bg-transparent border-transparent px-1 cursor-default focus:ring-0" value={item.nama_produk} readOnly />
+                      )}
+                    </td>
+                    <td className="px-[12px] py-[8px] text-center">
+                      <input className="form-input h-[28px] text-[12px] font-['JetBrains_Mono'] px-1 text-center w-full" type="number" min="1" value={item.qty || 1} onChange={e => {
+                        const newItems = [...data.items];
+                        newItems[idx].qty = Number(e.target.value);
+                        setData({...data, items: newItems});
+                      }} />
+                    </td>
+                    <td className="px-[12px] py-[8px]">
+                      {!item._unmatched && (
+                        <input 
+                          className="form-input h-[28px] text-[12px] w-full" 
+                          value={item.topping || ''} 
+                          onChange={e => {
+                            const newItems = [...data.items];
+                            newItems[idx].topping = e.target.value;
+                            setData({...data, items: newItems});
+                          }} 
+                          placeholder="Cth: Oreo"
+                        />
+                      )}
+                    </td>
+                    <td className="px-[12px] py-[8px] text-right text-[12px] font-['JetBrains_Mono']">
+                      {!item._unmatched && formatRupiah(item.subtotal)}
+                    </td>
+                    <td className="px-[12px] py-[8px] text-center text-[var(--text-disabled)] hover:text-[var(--status-cancelled)] cursor-pointer" onClick={() => handleItemDelete(idx)}>
+                      <Trash2 className="w-4 h-4 mx-auto" />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {/* Ringkasan */}
         <div>
-          <h3 className="font-semibold text-gray-800 border-b pb-1 mb-3">Ringkasan</h3>
-          <div className="bg-gray-50 p-3 rounded text-sm space-y-1">
-            <div className="flex justify-between"><span>Subtotal items:</span> <span>{formatRupiah(subtotal)}</span></div>
-            <div className="flex justify-between"><span>Ongkir:</span> <span>{formatRupiah(data.ongkir)}</span></div>
-            <div className="flex justify-between font-bold pt-2 border-t mt-2">
-              <span>Total:</span> <span>{formatRupiah(total)}</span>
+          <h3 className="card-header border-b border-[var(--border)] pb-[8px] mb-[12px]">Ringkasan</h3>
+          <div className="bg-[var(--bg-muted)] p-[16px] rounded-[6px] border border-[var(--border)] text-[13px] font-['Inter'] space-y-[4px]">
+            <div className="flex justify-between text-[var(--text-secondary)]"><span>Subtotal items:</span> <span className="font-['JetBrains_Mono'] text-[12px]">{formatRupiah(subtotal)}</span></div>
+            <div className="flex justify-between text-[var(--text-secondary)]"><span>Ongkir:</span> <span className="font-['JetBrains_Mono'] text-[12px]">{formatRupiah(data.ongkir)}</span></div>
+            <div className="flex justify-between font-medium text-[var(--text-primary)] pt-[8px] border-t border-[var(--border)] mt-[8px]">
+              <span>Total:</span> <span className="font-['Space_Grotesk'] text-[18px] text-[var(--amber)] leading-none">{formatRupiah(total)}</span>
             </div>
-            <div className="mt-2 text-orange-600 text-xs">
-              Kuota terpakai: Mengonsumsi {countDimsumBoxes(data.items)} box dimsum
+            <div className="mt-[12px] pt-[12px] border-t border-[var(--border)] border-dashed text-[11px] text-[var(--text-secondary)]">
+              Kuota terpakai: <span className="font-medium text-[var(--text-primary)]">{countDimsumBoxes(data.items)} box</span> dimsum
             </div>
           </div>
         </div>
       </div>
 
       {/* Action Footer */}
-      <div className="pt-4 border-t flex justify-between items-center bg-white">
-        <button onClick={onDiscard} className="text-gray-500 hover:text-gray-800 text-sm font-medium border px-4 py-2 rounded">Discard</button>
+      <div className="pt-[16px] mt-auto border-t border-[var(--border)] flex justify-between items-center bg-[var(--bg-surface)]">
+        <button onClick={onDiscard} className="btn-secondary px-[16px]">Discard</button>
         <button 
           onClick={checkQuotaAndSave}
           disabled={saving || data.items.length === 0}
-          className="bg-orange-600 text-white px-6 py-2 rounded shadow font-medium hover:bg-orange-700 disabled:bg-gray-300"
+          className="btn-primary flex items-center gap-[8px]"
         >
           {saving ? 'Menyimpan...' : '✓ Konfirmasi & Simpan'}
         </button>

@@ -9,12 +9,13 @@ import Kitchen from './screens/Kitchen';
 import Finance from './screens/Finance';
 import Alias from './screens/Alias';
 import Login from './screens/Login';
+import Assets from './screens/Assets';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 
 function AppContent() {
-  const { secretKey } = useAuth();
+  const { session } = useAuth();
 
-  if (!secretKey) {
+  if (!session) {
     return <Login />;
   }
 
@@ -30,6 +31,7 @@ function AppContent() {
           <Route path="kitchen" element={<Kitchen />} />
           <Route path="finance" element={<Finance />} />
           <Route path="alias" element={<Alias />} />
+          <Route path="assets" element={<Assets />} />
         </Route>
       </Routes>
     </BrowserRouter>

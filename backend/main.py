@@ -9,7 +9,7 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 
 from app.routers import sessions, slots, orders, kitchen, finance, alias, parse
-from app.utils.security import get_api_key
+from app.utils.security import get_current_user
 
 load_dotenv()
 
@@ -30,7 +30,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-auth_dep = [Depends(get_api_key)]
+auth_dep = [Depends(get_current_user)]
 
 app.include_router(sessions.router, dependencies=auth_dep)
 app.include_router(slots.router, dependencies=auth_dep)
@@ -40,10 +40,9 @@ app.include_router(finance.router, dependencies=auth_dep)
 app.include_router(alias.router, dependencies=auth_dep)
 app.include_router(parse.router, dependencies=auth_dep)
 
-@app.post("/auth/verify", dependencies=auth_dep)
-@limiter.limit("5/minute")
-def verify_auth(request: Request):
-    return {"status": "ok"}
+@app.get("/auth/me", dependencies=auth_dep)
+def verify_auth(request: Request, current_user: dict = Depends(get_current_user)):
+    return current_user
 
 @app.get("/")
 def read_root():

@@ -4,6 +4,7 @@ import { apiFetch } from '../api/client';
 import StatusBadge from '../components/StatusBadge';
 import ConfirmModal from '../components/ConfirmModal';
 import { formatDate } from '../utils/format';
+import { Calendar, Plus } from 'lucide-react';
 
 export default function Sessions() {
   const { refreshSessions } = useOutletContext();
@@ -120,93 +121,123 @@ export default function Sessions() {
     }
   };
 
-  if (loading) return <div className="p-8">Loading sessions...</div>;
+  if (loading) return (
+    <div className="p-4 md:p-8">
+      <div className="skeleton h-12 w-full mb-4"></div>
+      <div className="skeleton h-32 w-full"></div>
+    </div>
+  );
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-900">PO Sessions</h1>
+    <div className="max-w-5xl mx-auto space-y-[20px]">
+      <div className="flex justify-between items-center mb-2">
+        <h1 className="text-[24px] font-semibold text-[var(--text-primary)] font-['Space_Grotesk']">PO Sessions</h1>
         <button
           onClick={() => setIsModalOpen(true)}
           disabled={hasActiveSession}
-          className={`px-4 py-2 rounded shadow text-sm font-medium ${hasActiveSession ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-orange-600 text-white hover:bg-orange-700'}`}
+          className={`flex items-center gap-[6px] h-[36px] px-[16px] rounded-[6px] font-['Inter'] font-medium text-[13px] transition-colors ${
+            hasActiveSession 
+              ? 'bg-[var(--bg-muted)] text-[var(--text-disabled)] cursor-not-allowed border border-[var(--border)]' 
+              : 'bg-[var(--amber)] text-black hover:bg-[#d97706]'
+          }`}
         >
-          + New Session
+          <Plus className="w-4 h-4" />
+          New Session
         </button>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200 text-sm">
-          <thead className="bg-gray-50">
+      <div className="card overflow-x-auto p-0">
+        <table className="min-w-full border-collapse text-left">
+          <thead>
             <tr>
-              <th className="px-6 py-3 text-left font-medium text-gray-500">ID</th>
-              <th className="px-6 py-3 text-left font-medium text-gray-500">Tanggal Buka</th>
-              <th className="px-6 py-3 text-left font-medium text-gray-500">Tanggal Tutup</th>
-              <th className="px-6 py-3 text-left font-medium text-gray-500">Kuota</th>
-              <th className="px-6 py-3 text-left font-medium text-gray-500">Status</th>
+              <th className="table-header-cell">ID</th>
+              <th className="table-header-cell">Tanggal Buka</th>
+              <th className="table-header-cell">Tanggal Tutup</th>
+              <th className="table-header-cell">Kuota</th>
+              <th className="table-header-cell">Status</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200">
+          <tbody>
             {sessions.map(session => (
               <React.Fragment key={session.id_po}>
                 <tr 
-                  className={`hover:bg-orange-50 cursor-pointer ${expandedSessionId === session.id_po ? 'bg-orange-50' : ''}`}
+                  className={`table-row cursor-pointer ${expandedSessionId === session.id_po ? 'bg-[var(--bg-muted)]' : ''}`}
                   onClick={() => toggleExpand(session.id_po)}
                 >
-                  <td className="px-6 py-4 font-medium text-gray-900">PO-{session.id_po}</td>
-                  <td className="px-6 py-4 text-gray-500">{formatDate(session.tanggal_buka)}</td>
-                  <td className="px-6 py-4 text-gray-500">{formatDate(session.tanggal_tutup)}</td>
-                  <td className="px-6 py-4 text-gray-500">{session.kuota_maksimal} box</td>
-                  <td className="px-6 py-4">
+                  <td className="table-cell font-['JetBrains_Mono'] font-medium text-[var(--text-primary)]">PO-{session.id_po}</td>
+                  <td className="table-cell text-[var(--text-secondary)]">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-3 h-3 text-[var(--text-disabled)]" />
+                      {formatDate(session.tanggal_buka)}
+                    </div>
+                  </td>
+                  <td className="table-cell text-[var(--text-secondary)]">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-3 h-3 text-[var(--text-disabled)]" />
+                      {formatDate(session.tanggal_tutup)}
+                    </div>
+                  </td>
+                  <td className="table-cell text-[var(--text-secondary)]">
+                    <span className="font-['JetBrains_Mono']">{session.kuota_maksimal}</span> box
+                  </td>
+                  <td className="table-cell">
                     <StatusBadge status={session.status} />
                   </td>
                 </tr>
                 {/* Expandable slots panel */}
                 {expandedSessionId === session.id_po && (
-                  <tr>
-                    <td colSpan="5" className="bg-gray-50 px-6 py-4 border-t">
-                      <div className="mb-2 font-medium text-gray-700">Delivery Slots untuk PO-{session.id_po}</div>
-                      <div className="bg-white border rounded shadow-sm">
-                        <table className="min-w-full divide-y divide-gray-200 text-sm">
-                          <thead className="bg-gray-100">
+                  <tr className="bg-[var(--bg-muted)] border-b border-[var(--border)]">
+                    <td colSpan="5" className="px-[24px] py-[16px]">
+                      <div className="mb-[12px] font-medium text-[var(--text-secondary)] text-[12px] uppercase tracking-wider">
+                        Delivery Slots untuk PO-{session.id_po}
+                      </div>
+                      <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-[6px] overflow-hidden">
+                        <table className="min-w-full text-left">
+                          <thead className="bg-[var(--bg-elevated)] border-b border-[var(--border)]">
                             <tr>
-                              <th className="px-4 py-2 text-left text-gray-500 font-medium">Jadwal</th>
-                              <th className="px-4 py-2 text-center text-gray-500 font-medium">Gratis Ongkir</th>
-                              <th className="px-4 py-2 text-right text-gray-500 font-medium">Aksi</th>
+                              <th className="px-[16px] py-[8px] text-[12px] font-medium text-[var(--text-secondary)]">Jadwal</th>
+                              <th className="px-[16px] py-[8px] text-[12px] font-medium text-[var(--text-secondary)] text-center">Gratis Ongkir</th>
+                              <th className="px-[16px] py-[8px] text-[12px] font-medium text-[var(--text-secondary)] text-right">Aksi</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-gray-200">
+                          <tbody className="divide-y divide-[var(--border)]">
                             {slots.map(slot => (
-                              <tr key={slot.id_slot}>
-                                <td className="px-4 py-2 text-gray-700">{slot.jadwal_teks}</td>
-                                <td className="px-4 py-2 text-center">
+                              <tr key={slot.id_slot} className="hover:bg-[var(--bg-muted)]">
+                                <td className="px-[16px] py-[12px] text-[13px] text-[var(--text-primary)] font-medium">{slot.jadwal_teks}</td>
+                                <td className="px-[16px] py-[12px] text-center">
                                   <button 
                                     onClick={() => handleToggleOngkir(slot.id_slot, slot.is_free_ongkir)}
-                                    className={`px-3 py-1 rounded-full text-xs font-medium ${slot.is_free_ongkir ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-600'}`}
+                                    className={`px-[8px] py-[2px] rounded-[4px] text-[11px] font-['JetBrains_Mono'] font-medium border ${
+                                      slot.is_free_ongkir 
+                                        ? 'bg-[var(--status-sent)]/10 text-[var(--status-sent)] border-[var(--status-sent)]/30' 
+                                        : 'bg-[var(--bg-elevated)] text-[var(--text-disabled)] border-[var(--border)]'
+                                    }`}
                                   >
                                     {slot.is_free_ongkir ? 'ON' : 'OFF'}
                                   </button>
                                 </td>
-                                <td className="px-4 py-2 text-right">
-                                  <button onClick={() => setSlotToDelete(slot)} className="text-red-600 hover:underline">Hapus</button>
+                                <td className="px-[16px] py-[12px] text-right">
+                                  <button onClick={() => setSlotToDelete(slot)} className="text-[var(--status-cancelled)] hover:underline text-[12px]">Hapus</button>
                                 </td>
                               </tr>
                             ))}
                             {/* Add new slot row */}
                             {session.status === 'Active' && (
-                              <tr>
-                                <td className="px-4 py-2">
+                              <tr className="bg-[var(--bg-elevated)]">
+                                <td className="px-[16px] py-[8px]">
                                   <input 
                                     type="text" 
-                                    className="w-full border rounded px-2 py-1 text-sm focus:outline-none focus:ring focus:border-orange-500" 
+                                    className="form-input h-[32px] text-[13px]" 
                                     placeholder="Contoh: Rabu 17 Juni 10.00-13.00"
                                     value={newSlotJadwal}
                                     onChange={(e) => setNewSlotJadwal(e.target.value)}
                                   />
                                 </td>
-                                <td className="px-4 py-2 text-center text-gray-400">OFF (default)</td>
-                                <td className="px-4 py-2 text-right">
-                                  <button onClick={handleAddSlot} disabled={!newSlotJadwal.trim()} className="text-orange-600 font-medium hover:underline disabled:text-gray-400">
+                                <td className="px-[16px] py-[8px] text-center text-[12px] text-[var(--text-disabled)] font-['JetBrains_Mono']">
+                                  OFF (default)
+                                </td>
+                                <td className="px-[16px] py-[8px] text-right">
+                                  <button onClick={handleAddSlot} disabled={!newSlotJadwal.trim()} className="text-[var(--amber)] font-medium hover:underline disabled:text-[var(--text-disabled)] text-[12px]">
                                     Simpan
                                   </button>
                                 </td>
@@ -220,53 +251,58 @@ export default function Sessions() {
                 )}
               </React.Fragment>
             ))}
+            {sessions.length === 0 && (
+              <tr className="table-row">
+                <td colSpan="5" className="table-cell text-center text-[var(--text-secondary)]">Belum ada sesi PO.</td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
 
       {/* Create Session Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
-            <h2 className="text-xl font-bold mb-4">Buat Sesi PO Baru</h2>
-            <form onSubmit={handleCreateSession} className="space-y-4">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-[8px] shadow-2xl w-full max-w-md p-[24px]">
+            <h2 className="text-[18px] font-bold mb-[20px] font-['Space_Grotesk'] text-[var(--text-primary)]">Buat Sesi PO Baru</h2>
+            <form onSubmit={handleCreateSession} className="space-y-[16px]">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Tanggal Buka</label>
+                <label className="form-label">Tanggal Buka</label>
                 <input 
                   type="date" 
                   required
-                  className="w-full border rounded p-2 focus:ring focus:outline-none focus:border-orange-500" 
+                  className="form-input" 
                   value={newSession.tanggal_buka}
                   onChange={e => setNewSession({...newSession, tanggal_buka: e.target.value})}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Tanggal Tutup</label>
+                <label className="form-label">Tanggal Tutup</label>
                 <input 
                   type="date" 
                   required
-                  className="w-full border rounded p-2 focus:ring focus:outline-none focus:border-orange-500" 
+                  className="form-input" 
                   value={newSession.tanggal_tutup}
                   onChange={e => setNewSession({...newSession, tanggal_tutup: e.target.value})}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Kuota Maksimal (Box Dimsum)</label>
+                <label className="form-label">Kuota Maksimal (Box Dimsum)</label>
                 <input 
                   type="number" 
                   min="1"
                   required
-                  className="w-full border rounded p-2 focus:ring focus:outline-none focus:border-orange-500" 
+                  className="form-input" 
                   value={newSession.kuota_maksimal}
                   onChange={e => setNewSession({...newSession, kuota_maksimal: parseInt(e.target.value)})}
                 />
-                <p className="text-xs text-gray-500 mt-1">Bacar tidak dihitung dalam kuota.</p>
+                <p className="text-[11px] text-[var(--text-disabled)] mt-[6px]">Bacar tidak dihitung dalam kuota.</p>
               </div>
-              <div className="flex justify-end space-x-3 mt-6">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 border rounded text-gray-600 hover:bg-gray-50">
+              <div className="flex justify-end space-x-[12px] mt-[24px] pt-[16px] border-t border-[var(--border)]">
+                <button type="button" onClick={() => setIsModalOpen(false)} className="btn-secondary">
                   Batal
                 </button>
-                <button type="submit" className="px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-700">
+                <button type="submit" className="btn-primary">
                   Buat Sesi
                 </button>
               </div>

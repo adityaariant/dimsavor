@@ -1,21 +1,41 @@
 import os
 from fastapi import Header, HTTPException, status
-from dotenv import load_dotenv
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi import Depends
+from app.database import get_db
 
-load_dotenv()
+security = HTTPBearer()
 
-ADMIN_SECRET_KEY = os.environ.get("ADMIN_SECRET_KEY")
-
-async def get_api_key(x_api_key: str = Header(None)):
-    if not ADMIN_SECRET_KEY:
-        # If no key is configured on backend, we could default to open, but let's be strict.
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="ADMIN_SECRET_KEY is not configured on the server."
-        )
-    if x_api_key != ADMIN_SECRET_KEY:
+async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    token = credentials.credentials
+    db = get_db()
+    try:
+        # Validate JWT and get user
+        user_response = db.auth.get_user(token)
+        if not user_response or not user_response.user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid or expired token"
+            )
+        
+        user_id = user_response.user.id
+        
+        # Fetch profile
+        profile = db.table("profiles").select("display_name").eq("id", user_id).single().execute()
+        
+        if not profile.data:
+            display_name = user_response.user.email.split('@')[0]
+        else:
+            display_name = profile.data.get("display_name")
+            
+        return {
+            "id": user_id,
+            "email": user_response.user.email,
+            "display_name": display_name
+        }
+    except Exception as e:
+        print("Auth error:", str(e))
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid API Key"
+            detail="Could not validate credentials"
         )
-    return x_api_key

@@ -88,6 +88,32 @@ Navigate to `http://localhost:5173`. You will be greeted by the secure login scr
 
 ---
 
+## ☁️ Cloud Deployment (Zero-Budget)
+
+Dimsavor can be deployed entirely for free on Vercel (both Frontend and Backend).
+
+### 1. Deploy Backend to Vercel
+Since we use FastAPI, it can run as Serverless Functions on Vercel.
+1. Go to Vercel and **Add New Project**.
+2. Select the `backend` folder as the **Root Directory**.
+3. Under Environment Variables, add:
+   - `SUPABASE_URL`
+   - `SUPABASE_SERVICE_KEY`
+   - `ADMIN_SECRET_KEY`
+   - `CORS_ALLOWED_ORIGINS` (leave blank for now, update after deploying frontend).
+4. Click **Deploy**. Vercel will automatically use `vercel.json` to build the Python environment.
+
+### 2. Deploy Frontend to Vercel
+1. Go to Vercel and **Add New Project**.
+2. Select the `frontend` folder as the **Root Directory**.
+3. Under Environment Variables, add:
+   - `VITE_API_BASE_URL` = (Your Backend Vercel URL, e.g., `https://dimsavor-api.vercel.app`)
+4. Click **Deploy**.
+
+*Note: Remember to update the `CORS_ALLOWED_ORIGINS` on your backend project with your new frontend URL once it's live!*
+
+---
+
 ## 📚 Documentation Suite
 For a deep dive into the engineering and product decisions, review our documentation suite:
 - [PRD (Product Requirements Document)](PRD.md)

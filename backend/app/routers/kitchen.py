@@ -25,7 +25,7 @@ def get_kitchen_board(session_id: Optional[int] = None, date: Optional[str] = No
     # Build bundle map: {bundle_name: [{'nama_produk_komponen', 'qty_komponen'}]}
     bundle_map = {}
     for b in bundles.data:
-        b_name = b["nama_bundle"]
+        b_name = b["nama_produk_bundle"]
         if b_name not in bundle_map:
             bundle_map[b_name] = []
         bundle_map[b_name].append(b)

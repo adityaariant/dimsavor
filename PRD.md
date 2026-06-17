@@ -64,9 +64,7 @@ Multi-user support is out of scope.
 | **BSweet** | Rp 27.000 | bundle | 3× Bacar Besar |
 | **BAdil** | Rp 27.000 | bundle | 1× Bacar Besar + 3pcs Dimsum Ori + 3pcs Dimsum Mentai |
 
-> ⚠️ **[Inference]** Kitchen codes for each product have not been confirmed by admin.
-> Proposed codes: `O` (Dimsum Ori), `M6` / `M4` (Dimsum Mentai 6/4pcs), `bk` (Bacar Kecil), `bB` (Bacar Besar), `BS` (BSweet), `BD` (BAdil).
-> Admin must confirm or replace all codes before seeding the Alias_Menu table. See SDD.md Section 7.
+> Kitchen codes for each product are confirmed: `O` (Dimsum Ori), `M6` (Dimsum Mentai 6pcs), `M4` (Dimsum Mentai 4pcs), `bk` (Bacar Kecil), `bB` (Bacar Besar), `BS` (BSweet), `BD` (BAdil).
 
 ---
 
@@ -80,7 +78,7 @@ Multi-user support is out of scope.
 |---|---|
 | Dimsum Original (6pcs) | 1 unit |
 | Dimsum Mentai 6pcs | 1 unit |
-| Dimsum Mentai 4pcs | ⚠️ **[Unverified]** — needs admin confirmation |
+| Dimsum Mentai 4pcs | 1 unit |
 | Bacar Kecil / Bacar Besar | 0 units |
 | BSweet (3× Bacar Besar) | 0 units |
 | BAdil (1× Bacar Besar + 6pcs dimsum) | 1 unit |
@@ -97,8 +95,7 @@ Evaluated top-to-bottom; first match wins.
 | 2 | Area ∈ ITS (tekkim / itz / its / ...) **AND** delivery_slot.is_free_ongkir = TRUE | Rp 0 — free because admin is already on campus |
 | 3 (default) | All other cases | Rp 2.000 flat |
 
-> ⚠️ **[Unverified]** The complete list of ITS-area keywords beyond `tekkim` and `itz` is not confirmed.
-> The system stores area keywords in a maintainable DB table (`area_keywords`), editable from the Alias Manager screen without code changes.
+> The complete list of ITS-area keywords is maintainable in a DB table (`area_keywords`), editable from the Dictionary Manager screen without code changes.
 
 ---
 
@@ -121,7 +118,7 @@ Evaluated top-to-bottom; first match wins.
 ```
 [New Session Created] → status: Active
         ↓
-[Orders come in via WA → parsed → confirmed → saved]
+[Orders come in via WA → parsed → reviewed & edited → saved]
         ↓
 [Admin toggles PAID / SENT per order as fulfillment progresses]
         ↓
@@ -129,7 +126,7 @@ Evaluated top-to-bottom; first match wins.
         ↓
 [Admin manually triggers Close Batch when operations are winding down]
         ↓
-[System calculates profit split → status: Closed → data becomes read-only]
+[System calculates profit split and partner transfers → status: Closed → data becomes read-only]
 ```
 
 **Operational convention (confirmed by admin):** By the time Close Batch is triggered, all recorded orders are expected to be PAID. The system does not need to handle UNPAID + Closed as a normal case. No carry-over mechanism needed.
@@ -140,13 +137,13 @@ Evaluated top-to-bottom; first match wins.
 
 | # | Feature | Priority |
 |---|---|---|
-| 1 | Executive Dashboard | P0 |
+| 1 | Executive Dashboard (Unified parser, orders list, pagination, production summary) | P0 |
 | 2 | PO Session & Delivery Slot Management | P0 |
-| 3 | Smart WA Order Parser + Review Validator | P0 |
-| 4 | Interactive Order Fulfillment (status toggles) | P0 |
-| 5 | Finance & Profit Split | P0 |
-| 6 | Alias / Dictionary Manager | P1 |
-| 7 | Batch Analytics (time-series chart) | P2 |
+| 3 | Smart WA Order Parser + Review Form Override (Custom Price & Items) | P0 |
+| 4 | Interactive Order Fulfillment (optimistic toggles, detail drawer) | P0 |
+| 5 | Finance & Profit Split (Expense tracking & Settlement instructions) | P0 |
+| 6 | Dictionary Manager (Alias & Area keywords) | P1 |
+| 7 | Assets Library (Downloadable marketing/payment assets) | P1 |
 
 ---
 

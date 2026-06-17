@@ -160,22 +160,6 @@ export default function Dashboard() {
     setParsedData(emptyForm);
   };
 
-  // Calculations
-  const unpaidOrders = orders.filter(o => o.status_bayar === 'UNPAID');
-  const hasUnpaid = unpaidOrders.length > 0;
-  
-  const totalUnpaid = unpaidOrders.reduce((sum, order) => {
-    const orderItems = items.filter(i => i.id_order === order.id_order);
-    const subtotal = orderItems.reduce((s, i) => s + i.subtotal, 0);
-    return sum + subtotal + order.ongkir;
-  }, 0);
-
-  // Correct Quota Calculation using utility
-  const quotaUsed = countDimsumBoxesDecomposed(items);
-
-  // Detailed 7-Metrik Production Summary Breakdown
-  const prodSummary = calculateProductionSummary(items);
-
   // Filtering orders
   const filteredOrders = orders.filter(o => {
     if (filter === 'UNPAID' || filter === 'PAID') return o.status_bayar === filter;
@@ -188,11 +172,61 @@ export default function Dashboard() {
     return o.id_slot === Number(slotFilter);
   }).filter(o => o.nama_pelanggan.toLowerCase().includes(search.toLowerCase()));
 
+  // Filter items based on filtered orders
+  const filteredOrderIds = new Set(filteredOrders.map(o => o.id_order));
+  const filteredItems = items.filter(i => filteredOrderIds.has(i.id_order));
+
+  // Calculations
+  const unpaidOrders = orders.filter(o => o.status_bayar === 'UNPAID');
+  const hasUnpaid = unpaidOrders.length > 0;
+  
+  const totalUnpaid = unpaidOrders.reduce((sum, order) => {
+    const orderItems = items.filter(i => i.id_order === order.id_order);
+    const subtotal = orderItems.reduce((s, i) => s + i.subtotal, 0);
+    return sum + subtotal + order.ongkir;
+  }, 0);
+
+  // Correct Quota Calculation using utility (follows active filters)
+  const quotaUsed = countDimsumBoxesDecomposed(filteredItems);
+
+  // Detailed 7-Metrik Production Summary Breakdown (follows active filters)
+  const prodSummary = calculateProductionSummary(filteredItems);
+
   const getShortCode = (item) => {
-    const isBacar = item.nama_produk.toLowerCase().includes('bacar');
-    const isMentai = item.nama_produk.toLowerCase().includes('mentai');
-    let type = isBacar ? 'bk' : (isMentai ? 'M' : 'O');
-    return `${item.qty}${type}`;
+    // Search kitchen aliases for exact kitchen_code
+    const found = kitchen.aliases?.find(a => a.nama_produk_baku === item.nama_produk);
+    if (found) {
+      return `${item.qty}${found.kitchen_code}`;
+    }
+    
+    // Fallback logic
+    const nameLower = item.nama_produk.toLowerCase();
+    
+    if (nameLower.includes('sweet')) return `${item.qty}BS`;
+    if (nameLower.includes('adil')) return `${item.qty}BD`;
+    
+    if (nameLower.includes('bacar')) {
+      if (nameLower.includes('besar') || nameLower.includes('150ml') || nameLower.includes('bb')) {
+        return `${item.qty}bB`;
+      }
+      return `${item.qty}bk`;
+    }
+    
+    if (nameLower.includes('mentai')) {
+      if (nameLower.includes('4pcs') || nameLower.includes('4 pcs')) {
+        return `${item.qty}M4`;
+      }
+      if (nameLower.includes('6pcs') || nameLower.includes('6 pcs')) {
+        return `${item.qty}M6`;
+      }
+      return `${item.qty}M`;
+    }
+    
+    if (nameLower.includes('original')) {
+      return `${item.qty}O`;
+    }
+    
+    return `${item.qty}`;
   };
 
   return (

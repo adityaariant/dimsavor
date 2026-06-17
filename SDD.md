@@ -299,13 +299,13 @@ DELETE /expenses/{id_expense}         Delete expense
 
 GET    /finance/preview               Live profit split preview
        Query: ?session_id=
-       Returns: {total_paid, total_modal, laba_bersih, adit_amount, kila_amount}
+       Returns: {total_revenue, total_modal, laba_bersih, adit_receives, kila_receives, adit_pegang, kila_pegang, adit_transfer_to_kila, kila_transfer_to_adit}
 POST   /finance/close                 Finalize and close batch
        Query: ?session_id=
        Error 400 if UNPAID orders exist
 ```
 
-### 3.7 Alias Manager
+### 3.7 Dictionary Manager
 
 ```
 GET    /alias                         List all alias_menu entries
@@ -327,25 +327,30 @@ DELETE /area-keywords/{id_keyword}    Delete area keyword
 ```
 frontend/src/
 ├── App.jsx                     # React Router v6 setup
+├── App.css                     # Global custom animations
+├── index.css                   # Tailwind base and design system tokens
 ├── api/
 │   └── client.js               # fetch wrapper — reads VITE_API_BASE_URL
+├── contexts/
+│   └── AuthContext.jsx         # Stateless in-memory PIN authentication
 ├── components/
-│   ├── Layout.jsx              # Persistent sidebar + top bar
-│   ├── StatusBadge.jsx         # Colored pill: UNPAID/PAID/PENDING/SENT/CANCELLED
-│   ├── ConfirmModal.jsx        # Generic confirmation dialog (title, body, onConfirm)
-│   └── SummaryCard.jsx         # Metric card (label, value, sub-label)
+│   ├── Layout.jsx              # Persistent sidebar + active session display
+│   ├── StatusBadge.jsx         # Colored status pill (UNPAID/PAID/PENDING/SENT/CANCELLED)
+│   ├── ConfirmModal.jsx        # Generic reusable confirmation dialog
+│   ├── SummaryCard.jsx         # Metric card (label, value, sub-label)
+│   ├── OrderDrawer.jsx         # Full order detail side drawer with edit button
+│   └── KitchenChip.jsx         # Signature left-accented kitchen code chip
 ├── screens/
-│   ├── Dashboard.jsx           # Summary cards + production board + batch analytics
-│   ├── Sessions.jsx            # Session list + new session form + slot management
-│   ├── Parse.jsx               # Raw text input + Review Form
-│   │   └── ReviewForm.jsx      # Editable parsed order; calls POST /orders on confirm
-│   ├── Orders.jsx              # Filterable order table + optimistic toggles
-│   │   └── OrderDrawer.jsx     # Full order detail side panel
-│   ├── Kitchen.jsx             # Date tabs + decomposed production table
-│   ├── Finance.jsx             # Expense tracker + profit split preview + close batch
-│   └── Alias.jsx               # Alias table CRUD + area keywords sub-section
+│   ├── Dashboard.jsx           # Unified workspace (stats, 7-metric summary, parser, paginated orders table)
+│   ├── Sessions.jsx            # PO session management & delivery slot toggles/crud
+│   ├── Finance.jsx             # Expense tracker table + sticky split preview card & instructions
+│   ├── Alias.jsx               # Product aliases tab & area keywords tab CRUD
+│   ├── Assets.jsx              # Downloadable payment/marketing assets grid
+│   ├── ReviewForm.jsx          # Editable order validator with overrides and custom items
+│   └── Login.jsx               # PIN input form
 └── utils/
-    └── format.js               # formatRupiah(n), formatDate(d)
+    ├── format.js               # formatRupiah(n), formatDate(d)
+    └── pricing.js              # frontend pricing rules, quota calculator, and aggregated metrics
 ```
 
 ---
@@ -437,8 +442,7 @@ def decompose_items(
 DIMSUM_PRODUCTS = {
     'Dimsum Original',        # 6pcs = 1 box
     'Dimsum Mentai 6pcs',     # 6pcs = 1 box
-    # TODO [Unverified U-2]: Dimsum Mentai 4pcs quota rule not confirmed by admin
-    # Current placeholder: treat as 1 box (same as 6pcs) — confirm before go-live
+    'Dimsum Mentai 4pcs',     # 4pcs = 1 box (confirmed by admin)
 }
 
 PIECES_PER_BOX = 6
@@ -457,7 +461,7 @@ def count_dimsum_boxes(decomposed_items: list[dict]) -> int:
 
 ---
 
-### 5.5 Finance Calculator (`/backend/app/finance.py`)
+### 5.5 Finance Calculator (`/backend/app/routers/finance.py`)
 
 ```python
 def calculate_profit_split(
@@ -473,12 +477,26 @@ def calculate_profit_split(
     adit_modal = sum(e['nominal'] for e in expenses if e['dibayar_oleh'] == 'Adit')
     kila_modal = sum(e['nominal'] for e in expenses if e['dibayar_oleh'] == 'Kila')
 
+    # Cash receiver calculations (metode_bayar)
+    adit_pegang = sum(o['subtotal_items'] + o['ongkir'] for o in paid_orders if o['metode_bayar'] in ['BCA', 'Dana', 'Cash Adit'])
+    kila_pegang = sum(o['subtotal_items'] + o['ongkir'] for o in paid_orders if o['metode_bayar'] in ['QRIS', 'BNI', 'Shopeepay', 'Cash Kila'])
+
+    adit_receives = adit_modal + (laba_bersih // 2)
+    kila_receives = kila_modal + (laba_bersih // 2)
+
+    adit_transfer_to_kila = max(0, adit_pegang - adit_receives)
+    kila_transfer_to_adit = max(0, kila_pegang - kila_receives)
+
     return {
         'total_revenue':  total_revenue,
         'total_modal':    total_modal,
         'laba_bersih':    laba_bersih,
-        'adit_receives':  adit_modal + (laba_bersih // 2),
-        'kila_receives':  kila_modal + (laba_bersih // 2),
+        'adit_receives':  adit_receives,
+        'kila_receives':  kila_receives,
+        'adit_pegang':    adit_pegang,
+        'kila_pegang':    kila_pegang,
+        'adit_transfer_to_kila': adit_transfer_to_kila,
+        'kila_transfer_to_adit': kila_transfer_to_adit
     }
 ```
 
@@ -509,24 +527,22 @@ Backend:
   4. Write to order_items table
   5. Return created order
         ↓
-Frontend: Show success toast, reset Parse screen
+Frontend: Show success toast, reset parser state in Dashboard
 ```
 
 ---
 
-## 7. Kitchen Code Reference (Proposed)
+## 7. Kitchen Code Reference (Confirmed)
 
-> ⚠️ **[Inference]** All kitchen codes below are proposed values based on blueprint examples (`bk`, `M`, `O`). Admin must confirm or replace every code before seeding `alias_menu`. These should not be treated as finalized until confirmed.
-
-| Product | Proposed Code | Notes |
+| Product | Kitchen Code | Notes |
 |---|---|---|
 | Dimsum Original | `O` | From blueprint example |
-| Dimsum Mentai 6pcs | `M6` | Inferred — distinguishes from 4pcs |
-| Dimsum Mentai 4pcs | `M4` | Inferred |
+| Dimsum Mentai 6pcs | `M6` | Confirmed |
+| Dimsum Mentai 4pcs | `M4` | Confirmed |
 | Bacar Kecil 120ml | `bk` | From blueprint example |
-| Bacar Besar 150ml | `bB` | Inferred |
-| BSweet | `BS` | Inferred |
-| BAdil | `BD` | Inferred |
+| Bacar Besar 150ml | `bB` | Confirmed |
+| BSweet | `BS` | Confirmed |
+| BAdil | `BD` | Confirmed |
 
 **Usage in Production Board:** `{qty}{code}` per customer per date, e.g. `2M6`, `1bk`, `3bB`.
 
@@ -565,10 +581,10 @@ VITE_API_BASE_URL=https://Dimsavor-api.onrender.com
 
 | # | Item | Status |
 |---|---|---|
-| U-1 | Kitchen codes for all 7 products | Awaiting admin confirmation |
-| U-2 | Dimsum Mentai 4pcs quota unit rule | Awaiting admin confirmation |
-| U-3 | Complete ITS-area keyword list | Handled via maintainable DB table; expand as needed |
-| U-4 | Cash receiver reconciliation in profit split | Deferred — `metode_bayar` stored, reconciliation logic TBD |
+| U-1 | Kitchen codes for all 7 products | Confirmed and Implemented |
+| U-2 | Dimsum Mentai 4pcs quota unit rule | Confirmed and Implemented (1 unit quota) |
+| U-3 | Complete ITS-area keyword list | Handled via maintainable DB table |
+| U-4 | Cash receiver reconciliation in profit split | Confirmed and Implemented in Finance routers/screens |
 
 ---
 

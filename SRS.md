@@ -12,10 +12,10 @@ This document specifies all functional and non-functional requirements for the D
 The system covers:
 - PO Session and Delivery Slot management
 - WA chat text parsing into structured orders
-- Order fulfillment status tracking
-- Kitchen production board (per-date aggregation)
-- Financial expense tracking and profit split calculation
-- Alias dictionary management
+- Order fulfillment status tracking (paginated order list on Dashboard)
+- Production summary (7-metric decomposition on Dashboard)
+- Financial expense tracking and profit split calculation (with automated settlement transfers)
+- Dictionary management (aliases and area keywords)
 
 ### 1.3 Definitions
 
@@ -24,11 +24,11 @@ The system covers:
 | PO Session / Batch | A bounded sales period with open/close dates and a dimsum production quota |
 | Delivery Slot | A scheduled delivery window with an optional free-ongkir flag |
 | Kitchen Code | A short alphanumeric code identifying a product on the production board |
-| Quota Unit | One 6pcs box of dimsum; the unit of production capacity |
+| Quota Unit | One 6pcs box of dimsum (or one 4pcs box); the unit of production capacity |
 | Bacar | Banana Caramel drink (Kecil 120ml / Besar 150ml); exempt from quota |
 | Bundle | A fixed product combination (BSweet, BAdil) sold at a flat price |
 | Alias | A slang or abbreviated term mapping to a canonical product name |
-| Review Form | The editable pre-save UI presented to admin after parsing |
+| Review Form | The editable form presented to admin for order confirmation / manual overrides |
 | Admin | Adit (sole user of the system) |
 
 ---
@@ -57,7 +57,7 @@ The system covers:
 **FR-S08** Quota is counted from `Order_Items` by traversing `bundle_components` for bundle items:
   - Dimsum Original 6pcs → 1 quota unit
   - Dimsum Mentai 6pcs → 1 quota unit
-  - Dimsum Mentai 4pcs → ⚠️ **[Unverified]** — implement with a TODO flag pending admin confirmation
+  - Dimsum Mentai 4pcs → 1 quota unit
   - Bacar (any variant) → 0 quota units
   - BSweet → 0 quota units (contains only Bacar)
   - BAdil → 1 quota unit (contains 6pcs dimsum)
@@ -74,7 +74,7 @@ The system covers:
 | 2 | `area_tag` = ITS **AND** `slot.is_free_ongkir = TRUE` | Rp 0 |
 | 3 | All other cases | Rp 2.000 |
 
-**FR-D02** Area detection reads from the `area_keywords` table. Area keywords are maintainable by admin via the Alias Manager screen without code changes.
+**FR-D02** Area detection reads from the `area_keywords` table. Area keywords are maintainable by admin via the Dictionary Manager screen without code changes.
 
 **FR-D03** If `id_slot` is NULL (no delivery slot matched), the system defaults to Priority 3 (Rp 2.000) and flags the slot field as unmatched in the Review Form.
 
@@ -82,12 +82,11 @@ The system covers:
 
 ---
 
-### 2.3 Smart Order Parser
+### 2.3 Smart Order Parser & Review Form
 
-**FR-P01** Admin pastes raw WA chat text into a textarea and triggers parsing via a "Parse" button.
+**FR-P01** Admin pastes raw WA chat text into a textarea on the Dashboard and triggers parsing via a "Parse" button.
 
 **FR-P02** The parser must implement the following 9-step pipeline:
-
 ```
 Step 1: Split raw text on newline + delimiter keywords (Nama:, Pesanan:, Alamat:, Bayar:, Waktu:)
 Step 2: Tokenize pesanan lines by comma and/or newline
@@ -104,46 +103,50 @@ Step 9: Return structured ReviewFormObject — does NOT write to DB
 
 **FR-P04** Unmatched tokens must be flagged with `_unmatched: true` in the output and displayed visibly in the Review Form.
 
-**FR-P05** All parsed output is presented in an editable Review Form before any DB write. Admin must click "Konfirmasi & Simpan" explicitly.
+**FR-P05** All parsed output is presented in an editable Review Form directly on the Dashboard before any DB write. Admin must click "Konfirmasi & Simpan" explicitly.
 
-**FR-P06** Admin can edit any field in the Review Form: name, address, delivery slot, ongkir (via slot change), payment method, item quantities, toppings, and can add or delete items.
+**FR-P06** Admin can edit any field in the Review Form: name, address, delivery slot (with option to type a new slot), ongkir (manual override), payment method, item quantities, toppings, and can add or delete items.
 
-**FR-P07** The Review Form shows a Quota Impact indicator: how many dimsum boxes this order will add, and the resulting total (e.g. "akan menjadi 9/10 box").
+**FR-P07** If an item subtotal or order ongkir is manually overridden, it activates manual override flags (`is_custom_price` or `is_custom_ongkir`) locking them from automatic recalculations. Admin can click an "Auto" or "Reset Otomatis" button to restore default rules.
+
+**FR-P08** The Review Form shows a Quota Impact indicator: how many dimsum boxes this order will add to the active session.
 
 ---
 
 ### 2.4 Order Management
 
-**FR-O01** Orders are listed in a filterable table with filters: UNPAID, PAID, PENDING, SENT, CANCELLED, and Semua.
+**FR-O01** Orders are listed on the Dashboard screen in a filterable table. The table displays a maximum of **5 rows of data** per page with functional `← Prev` and `Next →` navigation.
 
-**FR-O02** Admin can toggle `status_bayar`: UNPAID → PAID. The update uses optimistic UI (instant local state change, reverts on API error).
+**FR-O02** Table filtering is supported by: status (Semua, UNPAID, PAID, PENDING, SENT, CANCELLED), delivery slot dropdown, and search by customer name.
 
-**FR-O03** Admin can toggle `status_kirim`: PENDING → SENT. Same optimistic UI behavior.
+**FR-O03** Admin can toggle `status_bayar`: UNPAID ↔ PAID. The update uses optimistic UI (instant local state change, reverts on API error).
 
-**FR-O04** Admin can cancel an order. This sets both `status_bayar = CANCELLED` and `status_kirim = CANCELLED`. A confirmation modal is required.
+**FR-O04** Admin can toggle `status_kirim`: PENDING ↔ SENT. Same optimistic UI behavior.
 
-**FR-O05** CANCELLED orders are visually greyed out with strikethrough styling. All status toggles are disabled on CANCELLED orders.
+**FR-O05** Admin can cancel an order. This sets both `status_bayar = CANCELLED` and `status_kirim = CANCELLED`. A confirmation modal is required. CANCELLED orders are greyed out with strikethrough styling and disabled status toggles.
 
-**FR-O06** Admin can view full order detail in a side drawer, including all Order_Items, subtotals, payment method, and delivery slot.
+**FR-O06** Admin can click the action arrow on a row to open the **Order Detail Drawer** in the right sidebar. The drawer displays full details and allows the admin to edit the order (opening the Review Form inside the drawer) or cancel the order.
 
 ---
 
-### 2.5 Kitchen Board
+### 2.5 Production summary & Decomposition
 
-**FR-K01** The kitchen board groups Order_Items by delivery date (from matched Delivery Slot).
+**FR-K01** The Dashboard displays a **Ringkasan Produksi** card aggregating all non-cancelled order items that match the active session filters (status, delivery slot, and customer name search).
 
 **FR-K02** Before aggregation, all bundle items are decomposed using `bundle_components`:
 - BSweet → 3× Bacar Besar 150ml
 - BAdil → 1× Bacar Besar + 3× Dimsum Original (pcs) + 3× Dimsum Mentai (pcs)
 
-**FR-K03** Decomposition is used only for kitchen board display and quota calculation. The `order_items` table stores bundle items as single rows for financial accuracy.
+**FR-K03** Decomposition is used only for kitchen production summary and quota calculations. The database stores the original bundle items to preserve pricing and billing integrity.
 
-**FR-K04** The board shows per-date:
-- A production summary header: total dimsum boxes (pcs ÷ 6) and total Bacar cups
-- A row per customer item using the format: `{qty}{kitchen_code}` (e.g. `2M6`, `1bk`)
-- Topping notes (Regal/Oreo) visible per Bacar item
-
-**FR-K05** The board is filterable by delivery date (one tab per Delivery Slot date).
+**FR-K04** The board shows a 7-metric production summary breakdown:
+- Box Mentai (standard Mentai boxes)
+- Box Original (standard Original boxes)
+- Box Mix (boxes containing 3 Ori + 3 Mentai from decomposed BAdil bundles)
+- Pcs Mentai (total Mentai pieces)
+- Pcs Original (total Original pieces)
+- Cup BB (Bacar Besar)
+- Cup BK (Bacar Kecil)
 
 ---
 
@@ -153,10 +156,9 @@ Step 9: Return structured ReviewFormObject — does NOT write to DB
 
 **FR-F02** Admin can delete any expense entry.
 
-**FR-F03** The profit split preview recalculates automatically on every PAID status change and every expense add/delete.
+**FR-F03** The profit split and partner settlement recalculate automatically on every PAID status change and every expense add/delete.
 
 **FR-F04** Profit split formula:
-
 ```
 Total Pendapatan PAID = Σ (order.subtotal_items + order.ongkir) for all PAID orders
 Total Modal          = Σ expenses.nominal
@@ -171,15 +173,20 @@ Kila menerima = Σ expenses where dibayar_oleh = 'Kila' + (Laba Bersih ÷ 2)
 **FR-F06** Finalizing a batch is irreversible. It requires explicit admin confirmation via modal. After finalization:
 - Session `status` → Closed
 - All orders, items, expenses become read-only
-- A Closed Batch Summary view is shown
+- A Closed Batch Summary view is shown with all inputs disabled
 
-**FR-F07** The `metode_bayar` values `Cash Adit` and `Cash Kila` record which partner physically received cash. This data is stored on the `orders` row and visible in Order Detail. Its integration into financial settlement is tracked as an open item.
+**FR-F07** The system tracks cash holding based on the payment method (`metode_bayar`):
+- Payments via `BCA`, `Dana`, or `Cash Adit` accumulate into `adit_pegang` (Adit holds cash).
+- Payments via `QRIS`, `BNI`, `Shopeepay`, or `Cash Kila` accumulate into `kila_pegang` (Kila holds cash).
 
-> ⚠️ **[Unverified]** The exact mechanism for reconciling cash received vs. materials paid (to ensure neither partner is double-counted in settlement) has not been finalized. Implement `metode_bayar` storage; defer reconciliation logic to a future iteration.
+**FR-F08** The system calculates final transfer settlement instructions:
+- `adit_transfer_to_kila = max(0, adit_pegang - adit_receives)`
+- `kila_transfer_to_adit = max(0, kila_pegang - kila_receives)`
+- It renders an instructions box on the Finance screen showing who needs to transfer what amount to whom (e.g. "Adit transfer ke Kila sebesar Rp X").
 
 ---
 
-### 2.7 Alias Dictionary Management
+### 2.7 Dictionary Management
 
 **FR-A01** Admin can view all `alias_menu` entries in a table.
 
@@ -187,7 +194,7 @@ Kila menerima = Σ expenses where dibayar_oleh = 'Kila' + (Laba Bersih ÷ 2)
 
 **FR-A03** Each alias entry has: `kata_kunci`, `nama_produk_baku`, `kitchen_code`.
 
-**FR-A04** Admin can manage `area_keywords` from a sub-section of the same screen.
+**FR-A04** Admin can manage `area_keywords` from the Area Keywords tab of the Dictionary Manager screen.
 
 **FR-A05** Changes to alias and area keyword tables take effect on the next parser run (no restart required).
 

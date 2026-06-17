@@ -434,60 +434,40 @@ Exit:  fade out + translateY(0 → 8px), 120ms
 
 ## Screen-Specific Design Notes
 
-### Dashboard
+### Dashboard (Unified Workspace)
 
-The Production Board grid is the hero of the screen. Give it the most vertical space.
+The Dashboard is the centralized operations command center. It is split into a metrics header and a main workspace:
+- **Summary Metrics (Top Row)**: A row of three cards:
+  - **Ringkasan Produksi (50% width)**: Left-aligned list displaying the 7-metric breakdown of steaming quantities and Bacar cups, with a caption showing dimsum boxes quota progress (`{used} / {max} box`).
+  - **Tagihan UNPAID (25% width)**: Total unpaid orders formatted in `JetBrains Mono` and amber status color.
+  - **Est. Laba Bersih (25% width)**: Estimated net profit from paid orders.
+- **Main Workspace (Bottom Row)**:
+  - **Left Column (40% width)**: Houses the **Smart Order Parser** textarea, which swaps directly with the **Review Form** once parsed.
+    - Review Form contains datalist autocompletes, custom qty inputs, and custom price inputs that highlight borders in yellow/amber upon manual override.
+  - **Right Column (60% width)**: Contains the **Daftar Pesanan** table.
+    - Columns: `#` (id), `Nama` (customer name), `Items` (signature kitchen code chips), `Total` (rupiah, right-aligned mono), `Bayar` (status Badge), `Kirim` (status Badge), and `→` (drawer trigger).
+    - Table includes pagination controls at the bottom (`← Prev` and `Next →`) showing max 5 rows of data.
+    - Filter row: status filters, slot filter dropdown, and search input.
 
-- Summary cards: 3-column row, equal width, `gap: 16px`
-- Production Board: below summary row, full width
-  - Column headers (dates): `Space Grotesk 500, 12px, uppercase` with `--text-secondary`
-  - Summary row (totals): `background: --amber-dim`, amber text for numbers
-  - Customer rows: alternating `--bg-base` / `--bg-elevated`
-  - Kitchen chips inline, no extra wrapping
-- Batch Analytics: collapsed by default behind a `▾ Lihat analitik batch` toggle — don't let it push production board below fold
+### PO Session & Slots (/sessions)
 
-### Order Parser (Parse Screen)
+- **PO Sessions Table**: Displays columns `ID`, `Tanggal Buka`, `Tanggal Tutup`, `Kuota`, and `Status`.
+- **Delivery Slots Sub-panel**: Expands directly below the session row upon click. It houses a sub-table with slots (`jadwal_teks`), toggle switches (`ON` / `OFF` for `is_free_ongkir`), and delete actions.
+- **New Session Modal**: A centered dialog overlay for inputting date open, date close, and maximum quota capacity.
 
-- Left panel (textarea): 40% width, full height of content area
-- Right panel (Review Form): 60% width, scrollable
-- Unmatched token rows: `background: rgba(248, 113, 113, 0.06)`, small `⚠` icon in amber before the text
-- Quota impact line: render as a mini progress bar inline, not just text
+### Finance Screen (/finance)
 
-### Order List
+- **Left Panel (50% width)**: Expense Tracker table containing `Nama Bahan` input, `Nominal` input, `Oleh` dropdown (Adit/Kila), and save button, followed by a total modal summary card.
+- **Right Panel (50% width)**: Sticky profit split preview card and a final settlement transfer instructions box. Large `Laba Bersih` font size (`--text-2xl`) in amber.
 
-No blank space in this table. Columns:
+### Dictionary Manager (/alias)
 
-```
-# (40px) | Nama (160px) | Items (chips, flex) | Jadwal (120px) | Total (90px, mono, right) | Bayar (toggle) | Kirim (toggle) | → (32px)
-```
+- **Dictionary Switcher**: Horizontal tabs at the top right header (`Product Aliases` | `Area Keywords`) to toggle between slang mapping and regional shipping tags.
+- Table uses inline-editable fields with immediate action triggers.
 
-- Items column: kitchen chips inline, max 3 chips then `+N more` in `--text-secondary`
-- Toggle controls: use compact toggle switches, not full badge clicks — tighter UX
-- Sticky header on scroll
+### Assets Library (/assets)
 
-### Kitchen Board
-
-Date tabs: horizontal tab bar, active tab has amber underline (2px), not a filled background.
-
-Production summary header (per date):
-```
-┌──────────────────────────────────────────────────────┐
-│  Rabu 17 Juni                                         │
-│  9 box dimsum · 54 pcs   ·   5 cup Bacar             │
-└──────────────────────────────────────────────────────┘
-```
-Rendered as a full-width `--amber-dim` background row with amber text for the numbers, `--text-secondary` for the labels.
-
-### Finance Screen
-
-Split the screen vertically:
-- Left half: Expense Tracker table
-- Right half: Profit Split Preview card (sticky while scrolling left side)
-
-Preview card numbers:
-- "Laba Bersih" is the largest number on screen (`--text-2xl`, amber color)
-- Adit/Kila breakdown: two rows, same `--text-xl`, `--text-primary`
-- "Close Batch" button: destructive style (red border), sits below the card, disabled state clearly visible
+- A clean grid of promotional and payment cards with download CTAs and a fullscreen preview overlay.
 
 ---
 
@@ -502,8 +482,6 @@ Minimal. Only where it aids orientation:
 | Status toggle update | Color transition 120ms |
 | Toast enter/exit | `translateY` + `opacity`, 150ms / 120ms |
 | Optimistic revert (error) | Brief `border: 1px solid --status-cancelled` flash, 400ms |
-| Row highlight (from board click) | `background: --amber-dim` pulse, 600ms, then settles |
-| Production Board load | Staggered row fade-in, 20ms delay per row, 150ms each |
 
 No looping animations. No page-load sequences. No scroll-triggered reveals — this is a tool, not a landing page.
 
@@ -539,9 +517,9 @@ Biasanya butuh ~30 detik pertama.
 **Empty tables:**
 One line, `--text-secondary`, centered in the table body area:
 ```
-Belum ada pesanan di sesi ini. Paste chat WA untuk mulai. →
+Belum ada pesanan di sesi ini. Gunakan parser di sebelah kiri untuk memulai.
 ```
-Arrow links to /parse. No illustrations.
+No illustrations.
 
 ---
 

@@ -21,12 +21,12 @@ The next major release focuses on eliminating remaining manual bottlenecks and p
   - Provide a dashboard widget that estimates the necessary quantity of Dimsum and ingredients for the next open session.
   - Adjust predictions based on calendar events, holidays, and previous growth trends.
 
-### 3. Automated Financial Reconciliation
-- **Objective:** Track and balance cash held by different business partners accurately.
+### 3. Expense Receipt OCR Scanning
+- **Objective:** Automatically parse physical receipts or screenshots of expenses.
 - **Details:**
-  - Implement a ledger system to track precisely which partner received payment for which order.
-  - Automate the calculation of "Who owes whom" at the end of each batch based on the defined 50/50 profit-sharing logic and operational expenses.
-  - Generate settlement reports to facilitate one-click inter-partner fund transfers.
+  - Add an upload widget on the Finance screen for receipts.
+  - Implement a lightweight server-side OCR utility to extract the total amount and item description from receipts.
+  - Automatically pre-fill the expense entry form for admin validation, reducing manual entry errors.
 
 ---
 
@@ -35,3 +35,4 @@ The next major release focuses on eliminating remaining manual bottlenecks and p
 - **Self-Service Ordering:** A lightweight, mobile-first web app where customers can place their own orders, completely bypassing WhatsApp chat.
 - **Real-Time Tracking:** Customers can track the status of their orders (e.g., "In Kitchen", "Out for Delivery") via a unique order link.
 - **Loyalty Program:** Automated tracking of returning customers to distribute digital discount codes and rewards.
+

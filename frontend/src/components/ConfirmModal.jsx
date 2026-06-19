@@ -5,13 +5,13 @@ export default function ConfirmModal({ isOpen, title, body, onConfirm, onCancel,
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity" onClick={onCancel}></div>
+      <div className="absolute inset-0 bg-[var(--text-primary)]/40 backdrop-blur-sm transition-opacity" onClick={onCancel}></div>
       
-      <div className="relative bg-[var(--bg-surface)] rounded-[8px] border border-[var(--border)] shadow-2xl max-w-md w-full overflow-hidden transform transition-all p-[24px]">
+      <div className="relative bg-[var(--bg-surface)] rounded-[14px] border border-[var(--border)] shadow-paper max-w-md w-full overflow-hidden transform transition-all p-[24px]">
         <div>
-          <h3 className="text-[18px] font-bold font-['Space_Grotesk'] text-[var(--text-primary)]" id="modal-title">{title}</h3>
+          <h3 className="text-[18px] font-bold font-['Fraunces'] text-[var(--text-primary)]" id="modal-title">{title}</h3>
           <div className="mt-[12px]">
-            <p className="text-[14px] text-[var(--text-secondary)] font-['Inter'] leading-relaxed">{body}</p>
+            <p className="text-[14px] text-[var(--text-secondary)] font-['Inter_Tight_Variable'] leading-relaxed">{body}</p>
           </div>
         </div>
         <div className="mt-[24px] pt-[16px] border-t border-[var(--border)] flex justify-end gap-[12px]">

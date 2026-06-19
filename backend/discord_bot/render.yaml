@@ -1,0 +1,23 @@
+services:
+  - type: worker
+    name: dimsavor-discord-bot
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python main.py
+    envVars:
+      - key: API_BASE_URL
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_BOT_EMAIL
+        sync: false
+      - key: SUPABASE_BOT_PASSWORD
+        sync: false
+      - key: DISCORD_BOT_TOKEN
+        sync: false
+      - key: DISCORD_CHANNEL_ID
+        sync: false
+      - key: DISCORD_SUMMARY_CHANNEL_ID
+        sync: false

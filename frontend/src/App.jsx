@@ -8,6 +8,7 @@ import Alias from './screens/Alias';
 import Login from './screens/Login';
 import Assets from './screens/Assets';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { ToastProvider } from './contexts/ToastContext';
 
 function AppContent() {
   const { session } = useAuth();
@@ -34,8 +35,10 @@ function AppContent() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
+    <ToastProvider>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    </ToastProvider>
   );
 }

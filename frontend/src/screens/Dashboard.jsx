@@ -10,9 +10,11 @@ import ReviewForm from './ReviewForm';
 import { formatRupiah } from '../utils/format';
 import { countDimsumBoxesDecomposed, calculateProductionSummary } from '../utils/pricing';
 import { Lock, Search, FileText, ShoppingBag, ArrowRight, RefreshCw, Sparkles, PlusCircle } from 'lucide-react';
+import { useToast } from '../contexts/ToastContext';
 
 export default function Dashboard() {
   const { selectedSession: session, isReadOnly, refreshSessions, refreshSessionData, sessionData, updateLocalOrder } = useOutletContext();
+  const { showToast } = useToast();
   const [isCloseModalOpen, setIsCloseModalOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -56,8 +58,8 @@ export default function Dashboard() {
   if (!session) {
     return (
       <div className="p-8 text-center max-w-lg mx-auto mt-20 card p-[40px]">
-        <h2 className="text-[20px] font-bold text-[var(--text-primary)] mb-[12px] font-['Space_Grotesk']">Belum ada sesi PO aktif</h2>
-        <p className="text-[14px] text-[var(--text-secondary)] mb-[24px] font-['Inter'] font-light">Buat sesi PO baru terlebih dahulu untuk mulai menerima pesanan.</p>
+        <h2 className="text-[20px] font-bold text-[var(--text-primary)] mb-[12px] font-['Fraunces']">Belum ada sesi PO aktif</h2>
+        <p className="text-[14px] text-[var(--text-secondary)] mb-[24px] font-['Inter_Tight_Variable'] font-light">Buat sesi PO baru terlebih dahulu untuk mulai menerima pesanan.</p>
         <button
           onClick={() => navigate('/sessions')}
           className="btn-primary"
@@ -78,12 +80,15 @@ export default function Dashboard() {
       refreshSessions();
       navigate('/finance');
     } catch (err) {
-      alert(err.message);
+      showToast(err.message, "error");
     }
   };
 
   const handleParse = async () => {
-    if (isReadOnly) return alert("Sesi sudah ditutup, tidak bisa menambah pesanan");
+    if (isReadOnly) {
+      showToast("Sesi sudah ditutup, tidak bisa menambah pesanan", "error");
+      return;
+    }
     if (!rawText.trim()) return;
     
     setParsing(true);
@@ -94,7 +99,7 @@ export default function Dashboard() {
       });
       setParsedData(result);
     } catch (err) {
-      alert("Gagal mem-parsing pesanan: " + err.message);
+      showToast("Gagal mem-parsing pesanan: " + err.message, "error");
     } finally {
       setParsing(false);
     }
@@ -110,7 +115,7 @@ export default function Dashboard() {
       await apiFetch(`/orders/${id_order}/pay`, { method: 'PATCH' });
       refreshSessionData();
     } catch (err) {
-      alert("Gagal update status bayar");
+      showToast("Gagal update status bayar", "error");
       updateLocalOrder(id_order, { status_bayar: currentStatus });
     }
   };
@@ -125,7 +130,7 @@ export default function Dashboard() {
       await apiFetch(`/orders/${id_order}/send`, { method: 'PATCH' });
       refreshSessionData();
     } catch (err) {
-      alert("Gagal update status kirim");
+      showToast("Gagal update status kirim", "error");
       updateLocalOrder(id_order, { status_kirim: currentStatus });
     }
   };
@@ -137,7 +142,7 @@ export default function Dashboard() {
       await refreshSessionData();
       setSelectedOrder(null);
     } catch (err) {
-      alert("Gagal membatalkan pesanan");
+      showToast("Gagal membatalkan pesanan", "error");
     }
   };
 
@@ -235,9 +240,9 @@ export default function Dashboard() {
       {/* Header Sesi */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-[24px] font-semibold text-[var(--text-primary)] font-['Space_Grotesk']">
+          <h1 className="text-[24px] font-semibold text-[var(--text-primary)] font-['Fraunces']">
             Dashboard
-            <span className="text-[var(--text-secondary)] font-normal text-[18px] ml-2">(PO-{session.id_po})</span>
+            <span className="text-[var(--text-secondary)] font-normal text-[18px] ml-2 font-['Inter_Tight_Variable']">(PO-{session.id_po})</span>
           </h1>
         </div>
         
@@ -255,7 +260,7 @@ export default function Dashboard() {
               <button
                 onClick={() => setIsCloseModalOpen(true)}
                 disabled={hasUnpaid}
-                className={`flex items-center gap-[6px] h-[36px] px-[16px] rounded-[6px] font-['Inter'] font-medium text-[13px] transition-colors ${
+                className={`flex items-center gap-[6px] h-[36px] px-[16px] rounded-[6px] font-['Inter_Tight_Variable'] font-medium text-[13px] transition-colors ${
                   hasUnpaid 
                     ? 'bg-[var(--bg-muted)] text-[var(--text-disabled)] cursor-not-allowed border border-[var(--border)]' 
                     : 'bg-[var(--status-cancelled)] text-white hover:bg-red-700'
@@ -281,28 +286,28 @@ export default function Dashboard() {
         <div className="lg:col-span-6 card p-[16px] flex flex-col justify-between">
           <div>
             <div className="flex justify-between items-center mb-3">
-              <h3 className="font-['Space_Grotesk'] font-bold text-[13px] uppercase tracking-wider text-[var(--text-secondary)]">Ringkasan Produksi</h3>
-              <span className="text-[11px] text-[var(--text-secondary)] font-['Inter']">
+              <h3 className="font-['Inter_Tight_Variable'] font-bold text-[13px] uppercase tracking-wider text-[var(--text-secondary)]">Ringkasan Produksi</h3>
+              <span className="text-[11px] text-[var(--text-secondary)] font-['Inter_Tight_Variable']">
                 Kuota Terpakai: <span className="text-[var(--text-primary)] font-semibold">{quotaUsed}</span> / {session.kuota_maksimal} box
               </span>
             </div>
             
             {/* Grid Breakdown */}
             <div className="grid grid-cols-3 gap-2">
-              <div className="bg-[#181612] border border-[var(--border)] rounded-[4px] p-2 text-center">
-                <div className="text-[10px] text-[var(--text-secondary)] font-medium">Box Mentai</div>
+              <div className="bg-[var(--bg-elevated)] border border-[var(--border)] rounded-[8px] p-2 text-center shadow-soft">
+                <div className="text-[10px] text-[var(--text-secondary)] font-medium font-['Inter_Tight_Variable']">Box Mentai</div>
                 <div className="text-[15px] font-bold text-[var(--amber)] font-['JetBrains_Mono']">{prodSummary.box_mentai} <span className="text-[10px] font-normal text-[var(--text-secondary)]">box</span></div>
-                <div className="text-[9px] text-[var(--text-disabled)] font-['Inter']">({prodSummary.pcs_mentai} pcs)</div>
+                <div className="text-[10px] text-[var(--text-secondary)] font-['Inter_Tight_Variable']">({prodSummary.pcs_mentai} pcs)</div>
               </div>
-              <div className="bg-[#181612] border border-[var(--border)] rounded-[4px] p-2 text-center">
-                <div className="text-[10px] text-[var(--text-secondary)] font-medium">Box Original</div>
+              <div className="bg-[var(--bg-elevated)] border border-[var(--border)] rounded-[8px] p-2 text-center shadow-soft">
+                <div className="text-[10px] text-[var(--text-secondary)] font-medium font-['Inter_Tight_Variable']">Box Original</div>
                 <div className="text-[15px] font-bold text-[#34D399] font-['JetBrains_Mono']">{prodSummary.box_ori} <span className="text-[10px] font-normal text-[var(--text-secondary)]">box</span></div>
-                <div className="text-[9px] text-[var(--text-disabled)] font-['Inter']">({prodSummary.pcs_ori} pcs)</div>
+                <div className="text-[10px] text-[var(--text-secondary)] font-['Inter_Tight_Variable']">({prodSummary.pcs_ori} pcs)</div>
               </div>
-              <div className="bg-[#181612] border border-[var(--border)] rounded-[4px] p-2 text-center">
-                <div className="text-[10px] text-[var(--text-secondary)] font-medium">Box Mix</div>
+              <div className="bg-[var(--bg-elevated)] border border-[var(--border)] rounded-[8px] p-2 text-center shadow-soft">
+                <div className="text-[10px] text-[var(--text-secondary)] font-medium font-['Inter_Tight_Variable']">Box Mix</div>
                 <div className="text-[15px] font-bold text-[#60A5FA] font-['JetBrains_Mono']">{prodSummary.box_mix} <span className="text-[10px] font-normal text-[var(--text-secondary)]">box</span></div>
-                <div className="text-[9px] text-[var(--text-disabled)] font-['Inter']">({prodSummary.box_mix * 3} O / {prodSummary.box_mix * 3} M)</div>
+                <div className="text-[10px] text-[var(--text-secondary)] font-['Inter_Tight_Variable']">({prodSummary.box_mix * 3} O / {prodSummary.box_mix * 3} M)</div>
               </div>
             </div>
           </div>
@@ -348,14 +353,14 @@ export default function Dashboard() {
           
           <div className="card p-[20px] flex flex-col min-h-[400px]">
             <div className="flex justify-between items-center mb-[16px] border-b border-[var(--border)] pb-[12px]">
-              <h2 className="font-bold text-[var(--text-primary)] font-['Space_Grotesk'] text-[15px] flex items-center gap-2">
+              <h2 className="font-bold text-[var(--text-primary)] font-['Fraunces'] text-[16px] flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-[var(--amber)]" />
                 {parsedData ? 'Review & Simpan Pesanan' : 'Smart Order Parser'}
               </h2>
               {!parsedData && !isReadOnly && (
                 <button
                   onClick={handleManualOrderClick}
-                  className="text-[11px] text-[var(--amber)] hover:underline flex items-center gap-[4px] font-medium bg-[#3D2A08] border border-[#7A520F] px-2 py-1 rounded"
+                  className="text-[11px] text-[var(--amber)] hover:underline flex items-center gap-[4px] font-medium bg-[var(--amber-dim)] border border-[var(--amber-dim)] px-2 py-1 rounded"
                 >
                   <PlusCircle className="w-3.5 h-3.5" />
                   Order Manual
@@ -377,11 +382,11 @@ export default function Dashboard() {
             ) : (
               <div className="flex-1 flex flex-col justify-between">
                 <div className="flex-1 flex flex-col">
-                  <p className="text-[12px] text-[var(--text-secondary)] mb-2 font-['Inter'] font-light">
+                  <p className="text-[13px] text-[var(--text-secondary)] mb-2 font-['Inter_Tight_Variable'] font-light">
                     Paste teks chat WhatsApp pesanan pelanggan di bawah ini untuk mendeteksi identitas, slot kirim, ongkir, dan item menu otomatis.
                   </p>
                   <textarea
-                    className="form-input flex-1 resize-none font-['JetBrains_Mono'] text-[13px] leading-relaxed p-[12px] mb-[16px] min-h-[200px]"
+                    className="form-input flex-1 resize-none font-['JetBrains_Mono'] text-[13px] leading-relaxed p-[12px] mb-[16px] min-h-[200px] shadow-inner"
                     placeholder="Contoh format chat:&#10;Nama: Budi&#10;Pesanan: 2 Box Mentai, 1bk&#10;Alamat: ITS Tekkim&#10;Waktu: Rabu 17 Juni Pagi"
                     value={rawText}
                     onChange={(e) => setRawText(e.target.value)}
@@ -411,11 +416,11 @@ export default function Dashboard() {
               
               {/* Header Kolom */}
               <div className="flex justify-between items-center">
-                <h2 className="font-bold text-[var(--text-primary)] font-['Space_Grotesk'] text-[15px] flex items-center gap-2">
+                <h2 className="font-bold text-[var(--text-primary)] font-['Fraunces'] text-[16px] flex items-center gap-2">
                   <ShoppingBag className="w-4 h-4 text-[var(--amber)]" />
                   Daftar Pesanan
                 </h2>
-                <span className="text-[11px] text-[var(--text-secondary)] font-['Inter']">
+                <span className="text-[11px] text-[var(--text-secondary)] font-['Inter_Tight_Variable']">
                   Menampilkan {filteredOrders.length} dari {orders.length} order
                 </span>
               </div>
@@ -429,10 +434,10 @@ export default function Dashboard() {
                     <button 
                       key={f} 
                       onClick={() => setFilter(f)}
-                      className={`px-2.5 py-1 rounded-[4px] text-[11px] font-medium font-['Inter'] transition-colors whitespace-nowrap ${
+                      className={`px-2.5 py-1 rounded-[6px] text-[12px] font-medium font-['Inter_Tight_Variable'] transition-colors whitespace-nowrap ${
                         filter === f 
-                          ? 'bg-[var(--amber)] text-[#0D0C0A]' 
-                          : 'bg-[#181612] border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                          ? 'bg-[var(--amber)] text-white shadow-sm' 
+                          : 'bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] shadow-sm'
                       }`}
                     >
                       {f}
@@ -444,7 +449,7 @@ export default function Dashboard() {
                   
                   {/* Slot Filter Dropdown */}
                   <select
-                    className="form-select flex-1 h-[34px] text-[12px] p-1 bg-[#181612] border border-[var(--border)] text-[#EDE9E0]"
+                    className="form-select flex-1 h-[34px] text-[12px] p-1 bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-primary)] shadow-sm font-['Inter_Tight_Variable']"
                     value={slotFilter}
                     onChange={e => setSlotFilter(e.target.value)}
                   >
@@ -565,7 +570,7 @@ export default function Dashboard() {
 
             {/* Pagination Controls */}
             {Math.ceil(filteredOrders.length / 5) > 1 && (
-              <div className="flex justify-between items-center mt-3 pt-3 border-t border-[var(--border)] font-['Inter'] text-[12px]">
+              <div className="flex justify-between items-center mt-3 pt-3 border-t border-[var(--border)] font-['Inter_Tight_Variable'] text-[12px]">
                 <button
                   onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
                   disabled={currentPage === 1}

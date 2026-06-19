@@ -5,9 +5,11 @@ import StatusBadge from '../components/StatusBadge';
 import ConfirmModal from '../components/ConfirmModal';
 import { formatDate } from '../utils/format';
 import { Calendar, Plus } from 'lucide-react';
+import { useToast } from '../contexts/ToastContext';
 
 export default function Sessions() {
   const { refreshSessions } = useOutletContext();
+  const { showToast } = useToast();
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedSessionId, setExpandedSessionId] = useState(null);
@@ -30,7 +32,7 @@ export default function Sessions() {
       const data = await apiFetch('/sessions/');
       setSessions(data);
     } catch (err) {
-      alert('Gagal memuat sesi: ' + err.message);
+      showToast('Gagal memuat sesi: ' + err.message, "error");
     } finally {
       setLoading(false);
     }
@@ -45,7 +47,7 @@ export default function Sessions() {
   const handleCreateSession = async (e) => {
     e.preventDefault();
     if (hasActiveSession) {
-      alert('Hanya boleh ada satu sesi aktif.');
+      showToast('Hanya boleh ada satu sesi aktif.', "error");
       return;
     }
     try {
@@ -58,7 +60,7 @@ export default function Sessions() {
       refreshSessions(); // Tell layout to update
       setNewSession({ tanggal_buka: '', tanggal_tutup: '', kuota_maksimal: 10 });
     } catch (err) {
-      alert('Gagal membuat sesi: ' + err.message);
+      showToast('Gagal membuat sesi: ' + err.message, "error");
     }
   };
 
@@ -67,7 +69,7 @@ export default function Sessions() {
       const data = await apiFetch(`/sessions/${id_po}/slots`);
       setSlots(data);
     } catch (err) {
-      alert('Gagal memuat slots: ' + err.message);
+      showToast('Gagal memuat slots: ' + err.message, "error");
     }
   };
 
@@ -91,7 +93,7 @@ export default function Sessions() {
       setNewSlotJadwal('');
       loadSlots(expandedSessionId);
     } catch (err) {
-      alert('Gagal menambah slot: ' + err.message);
+      showToast('Gagal menambah slot: ' + err.message, "error");
     }
   };
 
@@ -104,7 +106,7 @@ export default function Sessions() {
         body: JSON.stringify({ is_free_ongkir: !currentVal })
       });
     } catch (err) {
-      alert('Gagal update slot: ' + err.message);
+      showToast('Gagal update slot: ' + err.message, "error");
       // Revert optimistic update
       setSlots(slots.map(s => s.id_slot === id_slot ? { ...s, is_free_ongkir: currentVal } : s));
     }
@@ -116,7 +118,7 @@ export default function Sessions() {
       setSlotToDelete(null);
       loadSlots(expandedSessionId);
     } catch (err) {
-      alert('Gagal hapus slot: ' + err.message);
+      showToast('Gagal hapus slot: ' + err.message, "error");
       setSlotToDelete(null);
     }
   };
@@ -131,11 +133,11 @@ export default function Sessions() {
   return (
     <div className="max-w-5xl mx-auto space-y-[20px]">
       <div className="flex justify-between items-center mb-2">
-        <h1 className="text-[24px] font-semibold text-[var(--text-primary)] font-['Space_Grotesk']">PO Sessions</h1>
+        <h1 className="text-[24px] font-semibold text-[var(--text-primary)] font-['Fraunces']">PO Sessions</h1>
         <button
           onClick={() => setIsModalOpen(true)}
           disabled={hasActiveSession}
-          className={`flex items-center gap-[6px] h-[36px] px-[16px] rounded-[6px] font-['Inter'] font-medium text-[13px] transition-colors ${
+          className={`flex items-center gap-[6px] h-[36px] px-[16px] rounded-[6px] font-['Inter_Tight_Variable'] font-medium text-[13px] transition-colors ${
             hasActiveSession 
               ? 'bg-[var(--bg-muted)] text-[var(--text-disabled)] cursor-not-allowed border border-[var(--border)]' 
               : 'bg-[var(--amber)] text-black hover:bg-[#d97706]'
@@ -262,9 +264,9 @@ export default function Sessions() {
 
       {/* Create Session Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-[8px] shadow-2xl w-full max-w-md p-[24px]">
-            <h2 className="text-[18px] font-bold mb-[20px] font-['Space_Grotesk'] text-[var(--text-primary)]">Buat Sesi PO Baru</h2>
+        <div className="fixed inset-0 bg-[var(--text-primary)]/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-[14px] shadow-paper w-full max-w-md p-[24px]">
+            <h2 className="text-[18px] font-bold mb-[20px] font-['Fraunces'] text-[var(--text-primary)]">Buat Sesi PO Baru</h2>
             <form onSubmit={handleCreateSession} className="space-y-[16px]">
               <div>
                 <label className="form-label">Tanggal Buka</label>

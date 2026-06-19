@@ -84,15 +84,15 @@ export default function Layout() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-[#0D0C0A]">
+    <div className="flex h-screen bg-[var(--bg-base)]">
       
       {/* Mobile Top Bar */}
-      <div className="md:hidden fixed top-0 left-0 right-0 h-12 bg-[#181612] border-b border-[#302D28] flex items-center justify-between px-4 z-20">
-        <button onClick={() => setSidebarOpen(true)} className="text-[#837D74] hover:text-[#EDE9E0]">
+      <div className="md:hidden fixed top-0 left-0 right-0 h-12 bg-[var(--bg-elevated)] border-b border-[var(--border)] flex items-center justify-between px-4 z-20">
+        <button onClick={() => setSidebarOpen(true)} className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
           <Menu className="w-6 h-6" />
         </button>
-        <span className="font-['Space_Grotesk'] font-semibold text-[#EDE9E0]">DimsaVora</span>
-        <div className="text-xs bg-[#2A2722] text-[#EDE9E0] px-2 py-1 rounded">
+        <span className="font-['Fraunces'] font-semibold text-[var(--text-primary)]">Dimsavor</span>
+        <div className="text-xs bg-[var(--bg-muted)] text-[var(--text-primary)] px-2 py-1 rounded font-['Inter_Tight_Variable']">
           {selectedSession ? `PO-${selectedSession.id_po}` : '...'}
         </div>
       </div>
@@ -108,35 +108,39 @@ export default function Layout() {
       {/* Sidebar */}
       <aside className={`
         fixed md:static inset-y-0 left-0 z-40
-        w-[220px] bg-[#181612] border-r border-[#302D28] flex flex-col
+        w-[220px] bg-[var(--bg-elevated)] border-r border-[var(--border)] flex flex-col
         transition-transform duration-180 ease-out
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
       `}>
-        <div className="h-[52px] px-4 border-b border-[#302D28] flex flex-col justify-center relative">
+        <div className="h-[56px] px-4 border-b border-[var(--border)] flex items-center relative">
           <button 
-            className="md:hidden absolute top-3 right-3 text-[#837D74]" 
+            className="md:hidden absolute top-3 right-3 text-[var(--text-secondary)]" 
             onClick={() => setSidebarOpen(false)}
           >
             <X className="w-5 h-5" />
           </button>
           
-          <select 
-            className="w-full bg-transparent text-[#EDE9E0] font-['Space_Grotesk'] font-semibold text-[14px] appearance-none outline-none cursor-pointer"
-            value={selectedSessionId || ''}
-            onChange={e => setSelectedSessionId(e.target.value)}
-          >
-            {sessions.map(s => (
-              <option key={s.id_po} value={s.id_po} className="text-black">
-                PO-{s.id_po} · {s.status}
-              </option>
-            ))}
-            {sessions.length === 0 && <option value="" className="text-black">Tidak ada sesi</option>}
-          </select>
-          {selectedSession && (
-             <div className="text-[11px] text-[#837D74] font-['Inter']">
-               {selectedSession.status === 'Active' ? 'Active' : 'Closed'}
-             </div>
-          )}
+          <img src="/logo.png" alt="Logo" className="h-8 w-auto mr-2" />
+          
+          <div className="flex-1 min-w-0">
+            <select 
+              className="w-full bg-transparent text-[var(--text-primary)] font-['Fraunces'] font-semibold text-[15px] appearance-none outline-none cursor-pointer"
+              value={selectedSessionId || ''}
+              onChange={e => setSelectedSessionId(e.target.value)}
+            >
+              {sessions.map(s => (
+                <option key={s.id_po} value={s.id_po} className="text-black">
+                  PO-{s.id_po} · {s.status}
+                </option>
+              ))}
+              {sessions.length === 0 && <option value="" className="text-black">Tidak ada sesi</option>}
+            </select>
+            {selectedSession && (
+               <div className="text-[11px] text-[var(--text-secondary)] font-['Inter_Tight_Variable'] -mt-1">
+                 {selectedSession.status === 'Active' ? 'Active' : 'Closed'}
+               </div>
+            )}
+          </div>
         </div>
         
         <nav className="flex-1 overflow-y-auto space-y-[2px] py-2">
@@ -148,10 +152,10 @@ export default function Layout() {
                 to={item.to}
                 onClick={() => setSidebarOpen(false)}
                 className={({ isActive }) =>
-                  `flex items-center h-[34px] px-3 font-['Inter'] text-[13px] transition-colors ${
+                  `flex items-center h-[34px] px-3 font-['Inter_Tight_Variable'] text-[13px] transition-colors ${
                     isActive 
-                      ? 'bg-[#3D2A08] text-[#F5A623] border-l-[3px] border-[#F5A623] !pl-[9px]' 
-                      : 'text-[#837D74] hover:bg-[#2A2722] hover:text-[#EDE9E0]'
+                      ? 'bg-[var(--amber-dim)] text-[var(--amber)] border-l-[3px] border-[var(--amber)] !pl-[9px]' 
+                      : 'text-[var(--text-secondary)] hover:bg-[var(--bg-muted)] hover:text-[var(--text-primary)]'
                   }`
                 }
               >
@@ -163,19 +167,19 @@ export default function Layout() {
         </nav>
 
         {/* Footer (User) */}
-        <div className="p-4 border-t border-[#302D28] text-sm flex justify-between items-center">
-           <div className="text-[#837D74] font-['Inter'] text-[13px]">
-             User: <span className="text-[#EDE9E0]">{displayName || 'Admin'}</span>
+        <div className="p-4 border-t border-[var(--border)] text-sm flex justify-between items-center bg-[var(--bg-elevated)]">
+           <div className="text-[var(--text-secondary)] font-['Inter_Tight_Variable'] text-[13px]">
+             User: <span className="text-[var(--text-primary)] font-medium">{displayName || 'Admin'}</span>
            </div>
-           <button onClick={logout} className="text-[#F87171] hover:text-red-400">
+           <button onClick={logout} className="text-[var(--amber)] hover:text-[var(--amber-muted)]">
              <LogOut className="w-4 h-4" />
            </button>
         </div>
       </aside>
 
-      <main className="flex-1 overflow-y-auto p-4 md:p-6 relative mt-12 md:mt-0 bg-[#0D0C0A]">
+      <main className="flex-1 overflow-y-auto p-4 md:p-6 relative mt-12 md:mt-0 bg-[var(--bg-base)]">
         {isReadOnly && (
-          <div className="absolute top-0 left-0 right-0 bg-[#3D2A08] text-[#F5A623] text-center text-xs py-1 font-medium z-10 border-b border-[#7A520F]">
+          <div className="absolute top-0 left-0 right-0 bg-[var(--amber-dim)] text-[var(--amber-muted)] text-center text-xs py-1.5 font-medium z-10 border-b border-[var(--border)] font-['Inter_Tight_Variable']">
             Melihat data historis (Read-Only). Aksi dinonaktifkan.
           </div>
         )}

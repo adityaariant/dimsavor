@@ -10,6 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fontsource-variable/inter-tight": "^5.2.7",
+    "@fontsource/fraunces": "^5.2.9",
+    "@fontsource/jetbrains-mono": "^5.2.8",
     "@supabase/supabase-js": "^2.108.2",
     "html2canvas": "^1.4.1",
     "lucide-react": "^1.18.0",

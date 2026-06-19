@@ -20,10 +20,10 @@ export default function OrderDrawer({ order, items, isOpen, onClose, onCancelOrd
 
   return (
     <>
-      <div className="fixed inset-0 z-40 bg-black/80 backdrop-blur-sm transition-opacity" onClick={onClose} />
-      <div className="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-[var(--bg-surface)] border-l border-[var(--border)] shadow-2xl flex flex-col transform transition-transform">
-        <div className="p-[20px] border-b border-[var(--border)] flex justify-between items-center bg-[var(--bg-elevated)]">
-          <h2 className="text-[18px] font-bold text-[var(--text-primary)] font-['Space_Grotesk']">
+      <div className="fixed inset-0 z-40 bg-[var(--text-primary)]/40 backdrop-blur-sm transition-opacity" onClick={onClose} />
+      <div className="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-[var(--bg-surface)] border-l border-[var(--border)] shadow-paper flex flex-col transform transition-transform">
+        <div className="p-[20px] border-b border-[var(--border)] flex justify-between items-center bg-gradient-warm">
+          <h2 className="text-[18px] font-bold text-[var(--text-primary)] font-['Fraunces']">
             Pesanan #{order.id_order} — {order.nama_pelanggan}
           </h2>
           <button onClick={onClose} className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-2xl leading-none">&times;</button>
@@ -31,8 +31,8 @@ export default function OrderDrawer({ order, items, isOpen, onClose, onCancelOrd
         
         {!isEditMode ? (
           <>
-            <div className="flex-1 overflow-y-auto p-[20px] space-y-[24px] text-[13px] font-['Inter']">
-              <div className="space-y-[8px] bg-[var(--bg-muted)] p-[16px] rounded-[6px] border border-[var(--border)]">
+            <div className="flex-1 overflow-y-auto p-[20px] space-y-[24px] text-[13px] font-['Inter_Tight_Variable'] bg-[var(--bg-base)]">
+              <div className="space-y-[8px] bg-[var(--bg-surface)] p-[16px] rounded-[10px] shadow-soft border border-[var(--border)]">
                 <div className="grid grid-cols-3 text-[var(--text-secondary)]"><span className="col-span-1">Alamat:</span> <span className="col-span-2 text-[var(--text-primary)] font-medium">{order.alamat}</span></div>
                 <div className="grid grid-cols-3 text-[var(--text-secondary)]"><span className="col-span-1">Area:</span> <span className="col-span-2 text-[var(--text-primary)]">{order.area_tag || '-'}</span></div>
                 <div className="grid grid-cols-3 text-[var(--text-secondary)]"><span className="col-span-1">Jadwal:</span> <span className="col-span-2 text-[var(--text-primary)]">{order.delivery_slots?.jadwal_teks || order.jadwal_kirim_request || 'Tanpa Jadwal'}</span></div>
@@ -40,7 +40,7 @@ export default function OrderDrawer({ order, items, isOpen, onClose, onCancelOrd
                 <div className="grid grid-cols-3 text-[var(--text-secondary)]">
                   <span className="col-span-1">Ongkir:</span> 
                   <span className="col-span-2 text-[var(--text-primary)] font-['JetBrains_Mono'] text-[12px]">
-                    {formatRupiah(order.ongkir)} <span className="text-[11px] text-[var(--text-disabled)] font-['Inter']">({order.ongkir_rule || '-'})</span>
+                    {formatRupiah(order.ongkir)} <span className="text-[11px] text-[var(--text-secondary)] font-['Inter_Tight_Variable']">({order.ongkir_rule || '-'})</span>
                   </span>
                 </div>
               </div>
@@ -65,7 +65,7 @@ export default function OrderDrawer({ order, items, isOpen, onClose, onCancelOrd
               <div className="border-t border-[var(--border)] pt-[16px] space-y-[8px] text-right">
                 <div className="flex justify-between text-[var(--text-secondary)]"><span>Subtotal:</span> <span className="font-['JetBrains_Mono'] text-[12px]">{formatRupiah(subtotal)}</span></div>
                 <div className="flex justify-between text-[var(--text-secondary)]"><span>Ongkir:</span> <span className="font-['JetBrains_Mono'] text-[12px]">{formatRupiah(order.ongkir)}</span></div>
-                <div className="flex justify-between font-bold text-[18px] text-[var(--text-primary)] font-['Space_Grotesk'] mt-[12px] pt-[12px] border-t border-[var(--border)]">
+                <div className="flex justify-between font-bold text-[18px] text-[var(--text-primary)] font-['Fraunces'] mt-[12px] pt-[12px] border-t border-[var(--border)]">
                   <span>Total:</span> 
                   <span className="text-[var(--amber)] leading-none">{formatRupiah(total)}</span>
                 </div>

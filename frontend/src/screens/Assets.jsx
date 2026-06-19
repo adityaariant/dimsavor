@@ -30,17 +30,17 @@ export default function Assets() {
   return (
     <div className="max-w-6xl mx-auto space-y-[24px]">
       <div>
-        <h1 className="text-[24px] font-semibold text-[var(--text-primary)] font-['Space_Grotesk']">
+        <h1 className="text-[24px] font-semibold text-[var(--text-primary)] font-['Fraunces']">
           Assets Library
         </h1>
-        <p className="text-[14px] text-[var(--text-secondary)] font-['Inter'] mt-[4px]">
+        <p className="text-[14px] text-[var(--text-secondary)] font-['Inter_Tight_Variable'] mt-[4px]">
           Kumpulan QRIS dan materi promosi.
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[24px]">
         {ASSETS.map((asset) => (
-          <div key={asset.id} className="card overflow-hidden p-0 flex flex-col group">
+          <div key={asset.id} className="card overflow-hidden p-0 flex flex-col group border-[var(--border)] shadow-soft rounded-[12px]">
             <div 
               className="relative aspect-square bg-[var(--bg-muted)] overflow-hidden cursor-pointer"
               onClick={() => setSelectedAsset(asset)}
@@ -57,10 +57,10 @@ export default function Assets() {
             
             <div className="p-[16px] flex flex-col flex-1">
               <div className="flex justify-between items-start mb-[8px]">
-                <h3 className="font-semibold text-[var(--text-primary)] text-[15px]">{asset.title}</h3>
-                <span className="badge badge-pending bg-opacity-20 text-[10px]">{asset.category}</span>
+                <h3 className="font-semibold text-[var(--text-primary)] text-[16px] font-['Fraunces']">{asset.title}</h3>
+                <span className="badge badge-pending bg-opacity-20 text-[10px] font-['Inter_Tight_Variable']">{asset.category}</span>
               </div>
-              <p className="text-[13px] text-[var(--text-secondary)] font-['Inter'] mb-[16px] flex-1">
+              <p className="text-[13px] text-[var(--text-secondary)] font-['Inter_Tight_Variable'] mb-[16px] flex-1">
                 {asset.description}
               </p>
               

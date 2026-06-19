@@ -4,10 +4,12 @@ import { apiFetch } from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
 import ConfirmModal from '../components/ConfirmModal';
 import { formatRupiah } from '../utils/format';
+import { useToast } from '../contexts/ToastContext';
 
 export default function Finance() {
   const { selectedSession: session, refreshSessions, sessionData, refreshSessionData } = useOutletContext();
   const { displayName } = useAuth();
+  const { showToast } = useToast();
   
   const [newExpense, setNewExpense] = useState({
     nama_bahan: '',
@@ -50,7 +52,7 @@ export default function Finance() {
       setNewExpense({ nama_bahan: '', nominal: '', dibayar_oleh: displayName || 'Adit' });
       await refreshSessionData(); 
     } catch (err) {
-      alert("Gagal menambah pengeluaran: " + err.message);
+      showToast("Gagal menambah pengeluaran: " + err.message, "error");
     }
   };
 
@@ -59,7 +61,7 @@ export default function Finance() {
       await apiFetch(`/expenses/${id}`, { method: 'DELETE' });
       await refreshSessionData();
     } catch (err) {
-      alert("Gagal menghapus pengeluaran: " + err.message);
+      showToast("Gagal menghapus pengeluaran: " + err.message, "error");
     }
   };
 
@@ -69,7 +71,7 @@ export default function Finance() {
       setIsCloseModalOpen(false);
       refreshSessions(); 
     } catch (err) {
-      alert("Gagal menutup batch: " + err.message);
+      showToast("Gagal menutup batch: " + err.message, "error");
       setIsCloseModalOpen(false);
     }
   };
@@ -81,9 +83,9 @@ export default function Finance() {
     <div className="max-w-6xl mx-auto space-y-[20px]">
       <div className="flex justify-between items-center mb-2">
         <div>
-          <h1 className="text-[24px] font-semibold text-[var(--text-primary)] font-['Space_Grotesk']">
+          <h1 className="text-[24px] font-semibold text-[var(--text-primary)] font-['Fraunces']">
             Finance & Profit Split 
-            <span className="text-[var(--text-secondary)] font-normal text-[18px] ml-2">(PO-{session.id_po})</span>
+            <span className="text-[var(--text-secondary)] font-normal text-[18px] ml-2 font-['Inter_Tight_Variable']">(PO-{session.id_po})</span>
           </h1>
         </div>
         {isClosed && (
@@ -165,10 +167,10 @@ export default function Finance() {
             </table>
           </div>
           
-          <div className="bg-[var(--bg-muted)] p-[12px] rounded-[6px] border border-[var(--border)] font-['Inter'] text-[13px] space-y-[4px]">
+          <div className="bg-[var(--bg-elevated)] p-[12px] rounded-[10px] shadow-soft border border-[var(--border)] font-['Inter_Tight_Variable'] text-[13px] space-y-[4px]">
             <div className="flex justify-between text-[var(--text-secondary)]"><span>Adit total:</span> <span className="font-['JetBrains_Mono'] text-[12px] text-[var(--text-primary)]">{formatRupiah(aditTotal)}</span></div>
             <div className="flex justify-between text-[var(--text-secondary)]"><span>Kila total:</span> <span className="font-['JetBrains_Mono'] text-[12px] text-[var(--text-primary)]">{formatRupiah(kilaTotal)}</span></div>
-            <div className="flex justify-between font-medium text-[var(--text-primary)] border-t border-[var(--border)] pt-[8px] mt-[8px]"><span>Total Modal:</span> <span className="font-['JetBrains_Mono'] text-[12px]">{formatRupiah(preview?.total_modal || 0)}</span></div>
+            <div className="flex justify-between font-bold text-[var(--text-primary)] border-t border-[var(--border)] pt-[8px] mt-[8px]"><span>Total Modal:</span> <span className="font-['JetBrains_Mono'] text-[12px]">{formatRupiah(preview?.total_modal || 0)}</span></div>
           </div>
         </div>
 
@@ -176,7 +178,7 @@ export default function Finance() {
         <div className="card w-full lg:w-1/2 lg:sticky top-[20px]">
           <div className="card-header">Kalkulasi Bagi Hasil</div>
           
-          <div className="space-y-[8px] font-['Inter'] text-[14px]">
+          <div className="space-y-[8px] font-['Inter_Tight_Variable'] text-[14px]">
             <div className="flex justify-between text-[var(--text-secondary)]">
               <span>Total Pendapatan (PAID)</span>
               <span className="font-medium text-[var(--text-primary)] font-['JetBrains_Mono'] text-[13px]">{formatRupiah(preview?.total_revenue || 0)}</span>
@@ -188,38 +190,38 @@ export default function Finance() {
             
             <div className="flex justify-between font-bold border-t border-[var(--border)] pt-[16px] mt-[16px]">
               <span className="text-[var(--text-primary)]">Laba Bersih</span>
-              <span className="text-[32px] text-[var(--amber)] font-['Space_Grotesk'] leading-none">
+              <span className="text-[32px] text-[var(--amber)] font-['Fraunces'] leading-none">
                 {formatRupiah(preview?.laba_bersih || 0)}
               </span>
             </div>
           </div>
 
           <div className="mt-[24px] space-y-[12px]">
-            <div className="bg-[var(--bg-elevated)] p-[16px] rounded-[6px] border border-[var(--border)]">
-              <div className="text-[var(--text-secondary)] text-[11px] uppercase tracking-wider mb-[4px]">Porsi Adit</div>
+            <div className="bg-[var(--bg-elevated)] p-[16px] rounded-[10px] shadow-soft border border-[var(--border)]">
+              <div className="text-[var(--text-secondary)] font-['Inter_Tight_Variable'] text-[11px] uppercase tracking-wider mb-[4px]">Porsi Adit</div>
               <div className="flex justify-between items-end">
-                <div className="text-[11px] text-[var(--text-disabled)] font-['JetBrains_Mono']">
-                  {formatRupiah(aditTotal)} <span className="font-['Inter']">(modal)</span> + {formatRupiah((preview?.laba_bersih || 0) / 2)} <span className="font-['Inter']">(laba ÷ 2)</span>
+                <div className="text-[11px] text-[var(--text-secondary)] font-['JetBrains_Mono']">
+                  {formatRupiah(aditTotal)} <span className="font-['Inter_Tight_Variable']">(modal)</span> + {formatRupiah((preview?.laba_bersih || 0) / 2)} <span className="font-['Inter_Tight_Variable']">(laba ÷ 2)</span>
                 </div>
-                <div className="font-semibold text-[24px] text-[var(--text-primary)] font-['Space_Grotesk'] leading-none">{formatRupiah(preview?.adit_receives || 0)}</div>
+                <div className="font-semibold text-[24px] text-[var(--text-primary)] font-['Fraunces'] leading-none">{formatRupiah(preview?.adit_receives || 0)}</div>
               </div>
             </div>
 
-            <div className="bg-[var(--bg-elevated)] p-[16px] rounded-[6px] border border-[var(--border)]">
-              <div className="text-[var(--text-secondary)] text-[11px] uppercase tracking-wider mb-[4px]">Porsi Kila</div>
+            <div className="bg-[var(--bg-elevated)] p-[16px] rounded-[10px] shadow-soft border border-[var(--border)]">
+              <div className="text-[var(--text-secondary)] font-['Inter_Tight_Variable'] text-[11px] uppercase tracking-wider mb-[4px]">Porsi Kila</div>
               <div className="flex justify-between items-end">
-                <div className="text-[11px] text-[var(--text-disabled)] font-['JetBrains_Mono']">
-                  {formatRupiah(kilaTotal)} <span className="font-['Inter']">(modal)</span> + {formatRupiah((preview?.laba_bersih || 0) / 2)} <span className="font-['Inter']">(laba ÷ 2)</span>
+                <div className="text-[11px] text-[var(--text-secondary)] font-['JetBrains_Mono']">
+                  {formatRupiah(kilaTotal)} <span className="font-['Inter_Tight_Variable']">(modal)</span> + {formatRupiah((preview?.laba_bersih || 0) / 2)} <span className="font-['Inter_Tight_Variable']">(laba ÷ 2)</span>
                 </div>
-                <div className="font-semibold text-[24px] text-[var(--text-primary)] font-['Space_Grotesk'] leading-none">{formatRupiah(preview?.kila_receives || 0)}</div>
+                <div className="font-semibold text-[24px] text-[var(--text-primary)] font-['Fraunces'] leading-none">{formatRupiah(preview?.kila_receives || 0)}</div>
               </div>
             </div>
 
             {/* Settlement Block */}
-            <div className="bg-[var(--bg-muted)] p-[16px] rounded-[6px] border border-[var(--border)] mt-[24px]">
-              <div className="text-[var(--text-primary)] font-semibold mb-[12px] text-[14px]">Settlement Akhir</div>
+            <div className="bg-gradient-warm p-[16px] rounded-[10px] border border-[var(--amber-muted)] shadow-soft mt-[24px]">
+              <div className="text-[var(--text-primary)] font-bold mb-[12px] text-[15px] font-['Fraunces']">Settlement Akhir</div>
               
-              <div className="space-y-[8px] mb-[16px] text-[13px]">
+              <div className="space-y-[8px] mb-[16px] text-[13px] font-['Inter_Tight_Variable']">
                 <div className="flex justify-between text-[var(--text-secondary)]">
                   <span>Uang dipegang Adit:</span>
                   <span className="font-['JetBrains_Mono'] text-[var(--text-primary)]">{formatRupiah(preview?.adit_pegang || 0)}</span>
@@ -231,24 +233,24 @@ export default function Finance() {
               </div>
 
               {preview?.adit_transfer_to_kila > 0 && (
-                <div className="bg-[var(--amber)]/10 border border-[var(--amber)]/30 rounded-[6px] p-[12px] flex items-center gap-[12px]">
+                <div className="bg-white border border-[var(--amber)]/40 rounded-[8px] p-[12px] flex items-center gap-[12px] shadow-sm">
                   <div className="text-[20px]">💸</div>
                   <div>
-                    <div className="text-[11px] text-[var(--text-secondary)] uppercase tracking-wider mb-[2px]">Instruksi Transfer</div>
-                    <div className="text-[13px] text-[var(--text-primary)]">
-                      Adit transfer ke Kila sebesar <span className="font-bold font-['Space_Grotesk'] text-[var(--amber)]">{formatRupiah(preview.adit_transfer_to_kila)}</span>
+                    <div className="text-[11px] text-[var(--text-secondary)] font-['Inter_Tight_Variable'] uppercase tracking-wider mb-[2px]">Instruksi Transfer</div>
+                    <div className="text-[13px] text-[var(--text-primary)] font-['Inter_Tight_Variable']">
+                      Adit transfer ke Kila sebesar <span className="font-bold font-['Fraunces'] text-[var(--amber)] text-[15px]">{formatRupiah(preview.adit_transfer_to_kila)}</span>
                     </div>
                   </div>
                 </div>
               )}
               
               {preview?.kila_transfer_to_adit > 0 && (
-                <div className="bg-[var(--amber)]/10 border border-[var(--amber)]/30 rounded-[6px] p-[12px] flex items-center gap-[12px]">
+                <div className="bg-white border border-[var(--amber)]/40 rounded-[8px] p-[12px] flex items-center gap-[12px] shadow-sm">
                   <div className="text-[20px]">💸</div>
                   <div>
-                    <div className="text-[11px] text-[var(--text-secondary)] uppercase tracking-wider mb-[2px]">Instruksi Transfer</div>
-                    <div className="text-[13px] text-[var(--text-primary)]">
-                      Kila transfer ke Adit sebesar <span className="font-bold font-['Space_Grotesk'] text-[var(--amber)]">{formatRupiah(preview.kila_transfer_to_adit)}</span>
+                    <div className="text-[11px] text-[var(--text-secondary)] font-['Inter_Tight_Variable'] uppercase tracking-wider mb-[2px]">Instruksi Transfer</div>
+                    <div className="text-[13px] text-[var(--text-primary)] font-['Inter_Tight_Variable']">
+                      Kila transfer ke Adit sebesar <span className="font-bold font-['Fraunces'] text-[var(--amber)] text-[15px]">{formatRupiah(preview.kila_transfer_to_adit)}</span>
                     </div>
                   </div>
                 </div>

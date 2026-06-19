@@ -5,6 +5,7 @@ import { formatRupiah } from '../utils/format';
 import { calculateSubtotal, countDimsumBoxes } from '../utils/pricing';
 import { Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '../contexts/ToastContext';
 
 export default function ReviewForm({ initialData, session, onDiscard, refreshSessionData, isEditMode = false }) {
   const [data, setData] = useState(initialData);
@@ -12,6 +13,7 @@ export default function ReviewForm({ initialData, session, onDiscard, refreshSes
   const [aliases, setAliases] = useState([]);
   const [isQuotaModalOpen, setIsQuotaModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const { showToast } = useToast();
   const navigate = useNavigate();
 
   const [isCustomSlot, setIsCustomSlot] = useState(false);
@@ -142,7 +144,7 @@ export default function ReviewForm({ initialData, session, onDiscard, refreshSes
         navigate('/dashboard');
       }
     } catch (err) {
-      alert("Gagal menyimpan: " + err.message);
+      showToast("Gagal menyimpan: " + err.message, "error");
     } finally {
       setSaving(false);
       setIsQuotaModalOpen(false);
@@ -206,7 +208,7 @@ export default function ReviewForm({ initialData, session, onDiscard, refreshSes
                 value={data.alamat || ''} 
                 onChange={e => setData({...data, alamat: e.target.value})} 
               />
-              <span className="bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-secondary)] px-[8px] py-[4px] rounded-[4px] text-[11px] font-['JetBrains_Mono'] whitespace-nowrap">
+              <span className="bg-[var(--amber-dim)] border border-[var(--amber)] text-[var(--amber)] px-[8px] py-[4px] rounded-[6px] text-[11px] font-medium font-['Inter_Tight_Variable'] whitespace-nowrap shadow-sm">
                 🏷️ {data.area_tag || 'Lainnya'}
               </span>
             </div>
@@ -349,7 +351,7 @@ export default function ReviewForm({ initialData, session, onDiscard, refreshSes
                             <button
                               type="button"
                               onClick={() => handleUnmatchedResolve(idx, item.nama_produk)}
-                              className="btn-secondary h-[28px] text-[10px] px-2 whitespace-nowrap border border-[var(--border)] bg-[#2A2722] text-[#EDE9E0]"
+                              className="btn-secondary h-[28px] text-[10px] px-2 whitespace-nowrap border border-[var(--border)] bg-[var(--bg-elevated)] text-[var(--text-primary)]"
                             >
                               Gunakan teks asli
                             </button>
@@ -410,7 +412,7 @@ export default function ReviewForm({ initialData, session, onDiscard, refreshSes
                           <input
                             type="number"
                             className={`form-input h-[28px] text-[12px] font-['JetBrains_Mono'] px-1 text-right w-[75px] focus:ring-0 ${
-                              item.is_custom_price ? 'border-[var(--amber)] bg-[#3D2A08]/40 text-[var(--amber)] font-bold' : 'border-transparent bg-transparent'
+                              item.is_custom_price ? 'border-[var(--amber)] bg-[var(--amber-dim)] text-[var(--amber)] font-bold' : 'border-transparent bg-transparent'
                             }`}
                             value={item.subtotal || 0}
                             onChange={e => {
@@ -429,7 +431,7 @@ export default function ReviewForm({ initialData, session, onDiscard, refreshSes
                                 newItems[idx].is_custom_price = false;
                                 setData({...data, items: newItems});
                               }}
-                              className="text-[9px] text-[var(--amber)] hover:underline ml-1 font-bold bg-[#3D2A08] px-1 py-0.5 rounded border border-[#7A520F]"
+                              className="text-[9px] text-[var(--amber)] hover:underline ml-1 font-bold bg-[var(--amber-dim)] px-1 py-0.5 rounded border border-[var(--amber)]"
                             >
                               Auto
                             </button>
@@ -455,11 +457,11 @@ export default function ReviewForm({ initialData, session, onDiscard, refreshSes
         {/* Ringkasan */}
         <div>
           <h3 className="card-header border-b border-[var(--border)] pb-[8px] mb-[12px]">Ringkasan</h3>
-          <div className="bg-[var(--bg-muted)] p-[16px] rounded-[6px] border border-[var(--border)] text-[13px] font-['Inter'] space-y-[4px]">
+          <div className="bg-[var(--bg-elevated)] p-[16px] rounded-[10px] shadow-soft border border-[var(--border)] text-[13px] font-['Inter_Tight_Variable'] space-y-[4px]">
             <div className="flex justify-between text-[var(--text-secondary)]"><span>Subtotal items:</span> <span className="font-['JetBrains_Mono'] text-[12px]">{formatRupiah(subtotal)}</span></div>
             <div className="flex justify-between text-[var(--text-secondary)]"><span>Ongkir:</span> <span className="font-['JetBrains_Mono'] text-[12px]">{formatRupiah(data.ongkir)}</span></div>
-            <div className="flex justify-between font-medium text-[var(--text-primary)] pt-[8px] border-t border-[var(--border)] mt-[8px]">
-              <span>Total:</span> <span className="font-['Space_Grotesk'] text-[18px] text-[var(--amber)] leading-none">{formatRupiah(total)}</span>
+            <div className="flex justify-between font-bold text-[var(--text-primary)] pt-[8px] border-t border-[var(--border)] mt-[8px]">
+              <span>Total:</span> <span className="font-['Fraunces'] text-[18px] text-[var(--amber)] leading-none">{formatRupiah(total)}</span>
             </div>
             <div className="mt-[12px] pt-[12px] border-t border-[var(--border)] border-dashed text-[11px] text-[var(--text-secondary)]">
               Kuota terpakai: <span className="font-medium text-[var(--text-primary)]">{countDimsumBoxes(data.items)} box</span> dimsum

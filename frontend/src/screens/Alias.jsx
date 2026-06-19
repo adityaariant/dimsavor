@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { apiFetch } from '../api/client';
 import ConfirmModal from '../components/ConfirmModal';
+import { useToast } from '../contexts/ToastContext';
 
 export default function Alias() {
+  const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState('alias'); // 'alias' | 'area'
   const [aliases, setAliases] = useState([]);
   const [areas, setAreas] = useState([]);
@@ -48,7 +50,7 @@ export default function Alias() {
       setNewAlias({ kata_kunci: '', nama_produk_baku: '', kitchen_code: '' });
       loadData();
     } catch (err) {
-      alert("Gagal menambah alias: " + err.message);
+      showToast("Gagal menambah alias: " + err.message, "error");
     }
   };
 
@@ -67,7 +69,7 @@ export default function Alias() {
       setEditingAliasData(null);
       loadData();
     } catch (err) {
-      alert("Gagal update alias: " + err.message);
+      showToast("Gagal update alias: " + err.message, "error");
     }
   };
 
@@ -79,7 +81,7 @@ export default function Alias() {
       setNewArea({ keyword: '', area_tag: '' });
       loadData();
     } catch (err) {
-      alert("Gagal menambah area keyword: " + err.message);
+      showToast("Gagal menambah area keyword: " + err.message, "error");
     }
   };
 
@@ -94,7 +96,7 @@ export default function Alias() {
       setDeleteId(null);
       loadData();
     } catch (err) {
-      alert("Gagal menghapus data: " + err.message);
+      showToast("Gagal menghapus data: " + err.message, "error");
     }
   };
 
@@ -111,16 +113,16 @@ export default function Alias() {
   return (
     <div className="max-w-5xl mx-auto space-y-[24px]">
       <div className="flex justify-between items-center mb-[12px]">
-        <h1 className="text-[24px] font-semibold text-[var(--text-primary)] font-['Space_Grotesk']">Dictionary Manager</h1>
-        <div className="bg-[var(--bg-muted)] p-[4px] rounded-[6px] border border-[var(--border)] flex">
+        <h1 className="text-[24px] font-semibold text-[var(--text-primary)] font-['Fraunces']">Dictionary Manager</h1>
+        <div className="bg-[var(--bg-muted)] p-[4px] rounded-[8px] border border-[var(--border)] flex font-['Inter_Tight_Variable']">
           <button 
-            className={`px-[16px] py-[6px] rounded-[4px] text-[13px] font-medium transition-colors ${activeTab === 'alias' ? 'bg-[var(--bg-surface)] shadow-sm text-[var(--text-primary)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
+            className={`px-[16px] py-[6px] rounded-[6px] text-[13px] font-medium transition-colors ${activeTab === 'alias' ? 'bg-[var(--bg-surface)] shadow-soft text-[var(--text-primary)] border border-[var(--border)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-transparent'}`}
             onClick={() => setActiveTab('alias')}
           >
             Product Aliases
           </button>
           <button 
-            className={`px-[16px] py-[6px] rounded-[4px] text-[13px] font-medium transition-colors ${activeTab === 'area' ? 'bg-[var(--bg-surface)] shadow-sm text-[var(--text-primary)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
+            className={`px-[16px] py-[6px] rounded-[6px] text-[13px] font-medium transition-colors ${activeTab === 'area' ? 'bg-[var(--bg-surface)] shadow-soft text-[var(--text-primary)] border border-[var(--border)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-transparent'}`}
             onClick={() => setActiveTab('area')}
           >
             Area Keywords
@@ -128,7 +130,7 @@ export default function Alias() {
         </div>
       </div>
 
-      <div className="flex justify-between items-center bg-[var(--bg-surface)] p-[16px] rounded-[6px] shadow-sm border border-[var(--border)]">
+      <div className="flex justify-between items-center bg-[var(--bg-surface)] p-[16px] rounded-[10px] shadow-soft border border-[var(--border)]">
         <input 
           type="text" 
           placeholder="Cari kata kunci..." 
@@ -203,7 +205,7 @@ export default function Alias() {
                 <tr key={area.id_keyword} className="table-row">
                   <td className="table-cell font-['JetBrains_Mono'] text-[var(--text-primary)] bg-[var(--bg-muted)] border-r border-[var(--border)]">{area.keyword}</td>
                   <td className="table-cell">
-                    <span className="bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-secondary)] px-[8px] py-[4px] rounded-[4px] text-[11px] font-['JetBrains_Mono']">🏷️ {area.area_tag}</span>
+                    <span className="bg-[var(--amber-dim)] border border-[var(--amber)] text-[var(--amber)] px-[8px] py-[4px] rounded-[6px] text-[11px] font-medium font-['Inter_Tight_Variable'] shadow-sm">🏷️ {area.area_tag}</span>
                   </td>
                   <td className="table-cell text-right">
                     <button onClick={() => { setDeleteId(area.id_keyword); setDeleteType('area'); }} className="text-[var(--status-cancelled)] hover:underline text-[12px]">Hapus</button>

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { ChefHat } from 'lucide-react';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -25,18 +24,16 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--bg-base)] flex items-center justify-center p-4">
-      <div className="max-w-sm w-full card shadow-2xl">
+    <div className="min-h-screen bg-gradient-warm flex items-center justify-center p-4">
+      <div className="max-w-sm w-full card shadow-paper border-0">
         <div className="flex justify-center mb-6">
-          <div className="w-16 h-16 bg-[var(--amber-dim)] rounded-full flex items-center justify-center border-2 border-[var(--amber)]">
-            <ChefHat className="w-8 h-8 text-[var(--amber)]" />
-          </div>
+          <img src="/logo.png" alt="Dimsavor Logo" className="h-16 w-auto object-contain" />
         </div>
         
-        <h2 className="text-center text-[24px] font-['Space_Grotesk'] font-semibold text-[var(--text-primary)] mb-2">
-          Dimsavor Ops
+        <h2 className="text-center text-[24px] font-['Fraunces'] font-semibold text-[var(--text-primary)] mb-2">
+          Dimsavor
         </h2>
-        <p className="text-center text-[13px] text-[var(--text-secondary)] font-['Inter'] mb-8">
+        <p className="text-center text-[13px] text-[var(--text-secondary)] font-['Inter_Tight_Variable'] mb-8">
           Masuk ke sistem operasi Dimsavor.
         </p>
 
@@ -65,7 +62,7 @@ export default function Login() {
           </div>
           
           {error && (
-            <div className="text-[var(--status-cancelled)] text-[12px] text-center font-['Inter']">
+            <div className="text-[var(--status-cancelled)] text-[12px] text-center font-['Inter_Tight_Variable']">
               {error}
             </div>
           )}

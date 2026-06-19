@@ -28,7 +28,7 @@ export default function OrderDrawer({ order, items, isOpen, onClose, onCancelOrd
           <h2 className="text-[18px] font-bold text-foreground font-display">
             Pesanan #{order.id_order} — {order.nama_pelanggan}
           </h2>
-          <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8 text-muted-foreground hover:text-foreground">
+          <Button variant="ghost" size="icon" aria-label="Tutup Order" onClick={onClose} className="h-8 w-8 text-muted-foreground hover:text-foreground">
             <X className="h-5 w-5" />
           </Button>
         </div>

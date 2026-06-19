@@ -269,6 +269,7 @@ export default function Dashboard() {
             size="sm"
             onClick={refreshSessionData}
             title="Refresh Data"
+            aria-label="Refresh Data"
             className="rounded-full h-[32px] px-4 flex items-center gap-2 text-[12px] text-muted-foreground"
           >
             <RefreshCw className="w-3.5 h-3.5" />
@@ -311,20 +312,20 @@ export default function Dashboard() {
             
             {/* Grid Breakdown */}
             <div className="grid grid-cols-3 gap-[10px]">
-              <div className="bg-[#F5E4D7] rounded-[8px] p-3 text-center flex flex-col justify-center min-h-[90px]">
-                <div className="text-[10px] text-rust font-medium font-sans mb-1">Box Mentai</div>
-                <div className="text-[20px] font-bold text-[#C2410C] font-mono leading-none">{prodSummary.box_mentai} <span className="text-[10px] font-normal text-rust/70">box</span></div>
-                <div className="text-[10px] text-rust/80 font-sans mt-1">({prodSummary.pcs_mentai} pcs)</div>
+              <div className="bg-amber/10 rounded-[8px] p-3 text-center flex flex-col justify-center min-h-[90px]">
+                <div className="text-[10px] text-terracotta font-bold font-sans mb-1">Box Mentai</div>
+                <div className="text-[20px] font-bold text-terracotta font-mono leading-none">{prodSummary.box_mentai} <span className="text-[10px] font-medium text-terracotta">box</span></div>
+                <div className="text-[10px] text-terracotta font-medium font-sans mt-1">({prodSummary.pcs_mentai} pcs)</div>
               </div>
-              <div className="bg-[#E7F0EB] rounded-[8px] p-3 text-center flex flex-col justify-center min-h-[90px]">
-                <div className="text-[10px] text-forest font-medium font-sans mb-1">Box Original</div>
-                <div className="text-[20px] font-bold text-forest font-mono leading-none">{prodSummary.box_ori} <span className="text-[10px] font-normal text-forest/70">box</span></div>
-                <div className="text-[10px] text-forest/80 font-sans mt-1">({prodSummary.pcs_ori} pcs)</div>
+              <div className="bg-sage/10 rounded-[8px] p-3 text-center flex flex-col justify-center min-h-[90px]">
+                <div className="text-[10px] text-sage font-bold font-sans mb-1">Box Original</div>
+                <div className="text-[20px] font-bold text-sage font-mono leading-none">{prodSummary.box_ori} <span className="text-[10px] font-medium text-sage">box</span></div>
+                <div className="text-[10px] text-sage font-medium font-sans mt-1">({prodSummary.pcs_ori} pcs)</div>
               </div>
-              <div className="bg-[#E3EAF2] rounded-[8px] p-3 text-center flex flex-col justify-center min-h-[90px]">
-                <div className="text-[10px] text-ocean font-medium font-sans mb-1">Box Mix</div>
-                <div className="text-[20px] font-bold text-ocean font-mono leading-none">{prodSummary.box_mix} <span className="text-[10px] font-normal text-ocean/70">box</span></div>
-                <div className="text-[10px] text-ocean/80 font-sans mt-1">({prodSummary.box_mix * 3} O / {prodSummary.box_mix * 3} M)</div>
+              <div className="bg-blue-900/10 rounded-[8px] p-3 text-center flex flex-col justify-center min-h-[90px]">
+                <div className="text-[10px] text-blue-900 font-bold font-sans mb-1">Box Mix</div>
+                <div className="text-[20px] font-bold text-blue-900 font-mono leading-none">{prodSummary.box_mix} <span className="text-[10px] font-medium text-blue-900">box</span></div>
+                <div className="text-[10px] text-blue-900 font-medium font-sans mt-1">({prodSummary.box_mix * 3} O / {prodSummary.box_mix * 3} M)</div>
               </div>
             </div>
           </div>
@@ -469,7 +470,7 @@ export default function Dashboard() {
                   
                   {/* Slot Filter Dropdown */}
                   <Select value={slotFilter} onValueChange={setSlotFilter}>
-                    <SelectTrigger className="flex-1 h-8 text-[12px]">
+                    <SelectTrigger className="flex-1 h-8 text-[12px]" aria-label="Filter by Jadwal Kirim">
                       <SelectValue placeholder="Jadwal Kirim" />
                     </SelectTrigger>
                     <SelectContent>
@@ -564,6 +565,7 @@ export default function Dashboard() {
                               variant="ghost"
                               size="icon"
                               className="h-6 w-6"
+                              aria-label="Lihat Detail Pesanan"
                               onClick={() => setSelectedOrder(order)} 
                             >
                               <ArrowRight className="w-3.5 h-3.5" />

@@ -94,7 +94,7 @@ export default function Assets() {
                   <Download className="w-[16px] h-[16px]" />
                   Download
                 </button>
-                <button onClick={() => setSelectedAsset(null)} className="text-white hover:text-destructive text-[24px] leading-none">
+                <button onClick={() => setSelectedAsset(null)} aria-label="Tutup Preview" className="text-white hover:text-destructive text-[24px] leading-none">
                   <X className="w-6 h-6" />
                 </button>
               </div>

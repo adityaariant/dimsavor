@@ -88,7 +88,7 @@ export default function Layout() {
       
       {/* Mobile Top Bar */}
       <div className="md:hidden fixed top-0 left-0 right-0 h-12 bg-[var(--bg-elevated)] border-b border-[var(--border)] flex items-center justify-between px-4 z-20">
-        <button onClick={() => setSidebarOpen(true)} className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
+        <button onClick={() => setSidebarOpen(true)} aria-label="Buka Menu" className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
           <Menu className="w-6 h-6" />
         </button>
         <span className="font-['Fraunces'] font-semibold text-[var(--text-primary)]">Dimsavor</span>
@@ -114,6 +114,7 @@ export default function Layout() {
         <div className="h-[56px] px-4 border-b border-sidebar-border flex items-center relative">
           <button 
             className="md:hidden absolute top-3 right-3 text-sidebar-foreground/70" 
+            aria-label="Tutup Menu"
             onClick={() => setSidebarOpen(false)}
           >
             <X className="w-5 h-5" />
@@ -161,7 +162,7 @@ export default function Layout() {
            <div className="text-sidebar-foreground/70 font-sans text-[13px]">
              User: <span className="text-sidebar-foreground font-medium">{displayName || 'Admin'}</span>
            </div>
-           <button onClick={logout} className="text-terracotta hover:text-rust transition-colors">
+           <button onClick={logout} aria-label="Logout" className="text-terracotta hover:text-rust transition-colors">
              <LogOut className="w-4 h-4" />
            </button>
         </div>

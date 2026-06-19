@@ -9,6 +9,8 @@ import Login from './screens/Login';
 import Assets from './screens/Assets';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ToastProvider } from './contexts/ToastContext';
+import { Toaster } from './components/ui/sonner';
+import { TooltipProvider } from './components/ui/tooltip';
 
 function AppContent() {
   const { session } = useAuth();
@@ -35,10 +37,13 @@ function AppContent() {
 
 export default function App() {
   return (
-    <ToastProvider>
-      <AuthProvider>
-        <AppContent />
-      </AuthProvider>
-    </ToastProvider>
+    <TooltipProvider>
+      <ToastProvider>
+        <AuthProvider>
+          <AppContent />
+          <Toaster />
+        </AuthProvider>
+      </ToastProvider>
+    </TooltipProvider>
   );
 }

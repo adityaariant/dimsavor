@@ -2,6 +2,8 @@ import React, { useEffect } from 'react';
 import { formatRupiah } from '../utils/format';
 import ConfirmModal from './ConfirmModal';
 import ReviewForm from '../screens/ReviewForm';
+import { Button } from './ui/button';
+import { X } from 'lucide-react';
 
 export default function OrderDrawer({ order, items, isOpen, onClose, onCancelOrder, isReadOnly, session, refreshSessionData }) {
   const [isCancelModalOpen, setIsCancelModalOpen] = React.useState(false);
@@ -20,77 +22,81 @@ export default function OrderDrawer({ order, items, isOpen, onClose, onCancelOrd
 
   return (
     <>
-      <div className="fixed inset-0 z-40 bg-[var(--text-primary)]/40 backdrop-blur-sm transition-opacity" onClick={onClose} />
-      <div className="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-[var(--bg-surface)] border-l border-[var(--border)] shadow-paper flex flex-col transform transition-transform">
-        <div className="p-[20px] border-b border-[var(--border)] flex justify-between items-center bg-gradient-warm">
-          <h2 className="text-[18px] font-bold text-[var(--text-primary)] font-['Fraunces']">
+      <div className="fixed inset-0 z-40 bg-foreground/40 backdrop-blur-sm transition-opacity" onClick={onClose} />
+      <div className="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-background border-l border-border shadow-paper flex flex-col transform transition-transform">
+        <div className="p-[20px] border-b border-border flex justify-between items-center bg-gradient-warm">
+          <h2 className="text-[18px] font-bold text-foreground font-display">
             Pesanan #{order.id_order} — {order.nama_pelanggan}
           </h2>
-          <button onClick={onClose} className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-2xl leading-none">&times;</button>
+          <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8 text-muted-foreground hover:text-foreground">
+            <X className="h-5 w-5" />
+          </Button>
         </div>
         
         {!isEditMode ? (
           <>
-            <div className="flex-1 overflow-y-auto p-[20px] space-y-[24px] text-[13px] font-['Inter_Tight_Variable'] bg-[var(--bg-base)]">
-              <div className="space-y-[8px] bg-[var(--bg-surface)] p-[16px] rounded-[10px] shadow-soft border border-[var(--border)]">
-                <div className="grid grid-cols-3 text-[var(--text-secondary)]"><span className="col-span-1">Alamat:</span> <span className="col-span-2 text-[var(--text-primary)] font-medium">{order.alamat}</span></div>
-                <div className="grid grid-cols-3 text-[var(--text-secondary)]"><span className="col-span-1">Area:</span> <span className="col-span-2 text-[var(--text-primary)]">{order.area_tag || '-'}</span></div>
-                <div className="grid grid-cols-3 text-[var(--text-secondary)]"><span className="col-span-1">Jadwal:</span> <span className="col-span-2 text-[var(--text-primary)]">{order.delivery_slots?.jadwal_teks || order.jadwal_kirim_request || 'Tanpa Jadwal'}</span></div>
-                <div className="grid grid-cols-3 text-[var(--text-secondary)]"><span className="col-span-1">Metode:</span> <span className="col-span-2 text-[var(--text-primary)]">{order.metode_bayar || 'QRIS'}</span></div>
-                <div className="grid grid-cols-3 text-[var(--text-secondary)]">
+            <div className="flex-1 overflow-y-auto p-[20px] space-y-[24px] text-[13px] font-sans bg-muted/30">
+              <div className="space-y-[8px] bg-card p-[16px] rounded-[10px] shadow-soft border border-border">
+                <div className="grid grid-cols-3 text-muted-foreground"><span className="col-span-1">Alamat:</span> <span className="col-span-2 text-foreground font-medium">{order.alamat}</span></div>
+                <div className="grid grid-cols-3 text-muted-foreground"><span className="col-span-1">Area:</span> <span className="col-span-2 text-foreground">{order.area_tag || '-'}</span></div>
+                <div className="grid grid-cols-3 text-muted-foreground"><span className="col-span-1">Jadwal:</span> <span className="col-span-2 text-foreground">{order.delivery_slots?.jadwal_teks || order.jadwal_kirim_request || 'Tanpa Jadwal'}</span></div>
+                <div className="grid grid-cols-3 text-muted-foreground"><span className="col-span-1">Metode:</span> <span className="col-span-2 text-foreground">{order.metode_bayar || 'QRIS'}</span></div>
+                <div className="grid grid-cols-3 text-muted-foreground">
                   <span className="col-span-1">Ongkir:</span> 
-                  <span className="col-span-2 text-[var(--text-primary)] font-['JetBrains_Mono'] text-[12px]">
-                    {formatRupiah(order.ongkir)} <span className="text-[11px] text-[var(--text-secondary)] font-['Inter_Tight_Variable']">({order.ongkir_rule || '-'})</span>
+                  <span className="col-span-2 text-foreground font-mono text-[12px]">
+                    {formatRupiah(order.ongkir)} <span className="text-[11px] text-muted-foreground font-sans">({order.ongkir_rule || '-'})</span>
                   </span>
                 </div>
               </div>
 
               <div>
                 <table className="w-full">
-                  <tbody className="divide-y divide-[var(--border)]">
+                  <tbody className="divide-y divide-border">
                     {items.map((item, idx) => (
                       <tr key={idx} className="">
-                        <td className="py-[12px] text-[var(--text-primary)] font-medium">
+                        <td className="py-[12px] text-foreground font-medium">
                           {item.nama_produk} 
-                          {item.topping && <div className="text-[11px] text-[var(--text-secondary)] font-normal mt-[4px]">Topping: {item.topping}</div>}
+                          {item.topping && <div className="text-[11px] text-muted-foreground font-normal mt-[4px]">Topping: {item.topping}</div>}
                         </td>
-                        <td className="py-[12px] text-center text-[var(--text-secondary)] font-['JetBrains_Mono'] text-[12px]">x{item.qty}</td>
-                        <td className="py-[12px] text-right text-[var(--text-primary)] font-['JetBrains_Mono'] text-[12px]">{formatRupiah(item.subtotal)}</td>
+                        <td className="py-[12px] text-center text-muted-foreground font-mono text-[12px]">x{item.qty}</td>
+                        <td className="py-[12px] text-right text-foreground font-mono text-[12px]">{formatRupiah(item.subtotal)}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
 
-              <div className="border-t border-[var(--border)] pt-[16px] space-y-[8px] text-right">
-                <div className="flex justify-between text-[var(--text-secondary)]"><span>Subtotal:</span> <span className="font-['JetBrains_Mono'] text-[12px]">{formatRupiah(subtotal)}</span></div>
-                <div className="flex justify-between text-[var(--text-secondary)]"><span>Ongkir:</span> <span className="font-['JetBrains_Mono'] text-[12px]">{formatRupiah(order.ongkir)}</span></div>
-                <div className="flex justify-between font-bold text-[18px] text-[var(--text-primary)] font-['Fraunces'] mt-[12px] pt-[12px] border-t border-[var(--border)]">
+              <div className="border-t border-border pt-[16px] space-y-[8px] text-right">
+                <div className="flex justify-between text-muted-foreground"><span>Subtotal:</span> <span className="font-mono text-[12px]">{formatRupiah(subtotal)}</span></div>
+                <div className="flex justify-between text-muted-foreground"><span>Ongkir:</span> <span className="font-mono text-[12px]">{formatRupiah(order.ongkir)}</span></div>
+                <div className="flex justify-between font-bold text-[18px] text-foreground font-display mt-[12px] pt-[12px] border-t border-border">
                   <span>Total:</span> 
-                  <span className="text-[var(--amber)] leading-none">{formatRupiah(total)}</span>
+                  <span className="text-terracotta leading-none">{formatRupiah(total)}</span>
                 </div>
               </div>
             </div>
 
             {!isReadOnly && order.status_bayar !== 'CANCELLED' && (
-              <div className="p-[20px] border-t border-[var(--border)] bg-[var(--bg-elevated)] flex gap-[12px]">
-                <button 
+              <div className="p-[20px] border-t border-border bg-card flex gap-[12px]">
+                <Button 
+                  variant="outline"
                   onClick={() => setIsEditMode(true)}
-                  className="btn-secondary w-1/2"
+                  className="w-1/2"
                 >
                   Edit Pesanan
-                </button>
-                <button 
+                </Button>
+                <Button 
+                  variant="destructive"
                   onClick={() => setIsCancelModalOpen(true)}
-                  className="btn-destructive w-1/2 bg-[var(--status-cancelled)]/10 text-[var(--status-cancelled)] border border-[var(--status-cancelled)] hover:bg-[var(--status-cancelled)]/20"
+                  className="w-1/2"
                 >
                   Batalkan
-                </button>
+                </Button>
               </div>
             )}
           </>
         ) : (
-          <div className="flex-1 overflow-y-auto p-[20px] bg-[var(--bg-surface)]">
+          <div className="flex-1 overflow-y-auto p-[20px] bg-background">
             <ReviewForm 
               isEditMode={true}
               session={session}

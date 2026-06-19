@@ -105,45 +105,35 @@ export default function Layout() {
         />
       )}
 
-      {/* Sidebar */}
       <aside className={`
         fixed md:static inset-y-0 left-0 z-40
-        w-[220px] bg-[var(--bg-elevated)] border-r border-[var(--border)] flex flex-col
+        w-[220px] bg-[var(--color-sidebar)] border-r border-sidebar-border flex flex-col
         transition-transform duration-180 ease-out
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
       `}>
-        <div className="h-[56px] px-4 border-b border-[var(--border)] flex items-center relative">
+        <div className="h-[56px] px-4 border-b border-sidebar-border flex items-center relative">
           <button 
-            className="md:hidden absolute top-3 right-3 text-[var(--text-secondary)]" 
+            className="md:hidden absolute top-3 right-3 text-sidebar-foreground/70" 
             onClick={() => setSidebarOpen(false)}
           >
             <X className="w-5 h-5" />
           </button>
           
-          <img src="/logo.png" alt="Logo" className="h-8 w-auto mr-2" />
-          
-          <div className="flex-1 min-w-0">
-            <select 
-              className="w-full bg-transparent text-[var(--text-primary)] font-['Fraunces'] font-semibold text-[15px] appearance-none outline-none cursor-pointer"
-              value={selectedSessionId || ''}
-              onChange={e => setSelectedSessionId(e.target.value)}
-            >
-              {sessions.map(s => (
-                <option key={s.id_po} value={s.id_po} className="text-black">
-                  PO-{s.id_po} · {s.status}
-                </option>
-              ))}
-              {sessions.length === 0 && <option value="" className="text-black">Tidak ada sesi</option>}
-            </select>
-            {selectedSession && (
-               <div className="text-[11px] text-[var(--text-secondary)] font-['Inter_Tight_Variable'] -mt-1">
-                 {selectedSession.status === 'Active' ? 'Active' : 'Closed'}
+          <div className="flex-1 min-w-0 pl-2">
+            <h1 className="text-[20px] font-bold text-sidebar-foreground font-display tracking-tight">Amara.</h1>
+            {selectedSession ? (
+               <div className="text-[10px] text-sidebar-foreground/70 font-medium font-sans uppercase tracking-widest mt-1">
+                 PO-{selectedSession.id_po} • {selectedSession.status}
+               </div>
+            ) : (
+               <div className="text-[10px] text-sidebar-foreground/70 font-medium font-sans uppercase tracking-widest mt-1">
+                 Tidak ada sesi
                </div>
             )}
           </div>
         </div>
         
-        <nav className="flex-1 overflow-y-auto space-y-[2px] py-2">
+        <nav className="flex-1 overflow-y-auto space-y-[2px] py-4">
           {navItems.map((item) => {
             const Icon = item.icon;
             return (
@@ -152,10 +142,10 @@ export default function Layout() {
                 to={item.to}
                 onClick={() => setSidebarOpen(false)}
                 className={({ isActive }) =>
-                  `flex items-center h-[34px] px-3 font-['Inter_Tight_Variable'] text-[13px] transition-colors ${
+                  `flex items-center h-[38px] px-3 font-sans text-[13px] transition-colors mx-2 mb-1 rounded-[6px] ${
                     isActive 
-                      ? 'bg-[var(--amber-dim)] text-[var(--amber)] border-l-[3px] border-[var(--amber)] !pl-[9px]' 
-                      : 'text-[var(--text-secondary)] hover:bg-[var(--bg-muted)] hover:text-[var(--text-primary)]'
+                      ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium border-l-[3px] border-terracotta !pl-[9px]' 
+                      : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
                   }`
                 }
               >
@@ -167,38 +157,40 @@ export default function Layout() {
         </nav>
 
         {/* Footer (User) */}
-        <div className="p-4 border-t border-[var(--border)] text-sm flex justify-between items-center bg-[var(--bg-elevated)]">
-           <div className="text-[var(--text-secondary)] font-['Inter_Tight_Variable'] text-[13px]">
-             User: <span className="text-[var(--text-primary)] font-medium">{displayName || 'Admin'}</span>
+        <div className="p-4 border-t border-sidebar-border text-sm flex justify-between items-center bg-sidebar">
+           <div className="text-sidebar-foreground/70 font-sans text-[13px]">
+             User: <span className="text-sidebar-foreground font-medium">{displayName || 'Admin'}</span>
            </div>
-           <button onClick={logout} className="text-[var(--amber)] hover:text-[var(--amber-muted)]">
+           <button onClick={logout} className="text-terracotta hover:text-rust transition-colors">
              <LogOut className="w-4 h-4" />
            </button>
         </div>
       </aside>
 
-      <main className="flex-1 overflow-y-auto p-4 md:p-6 relative mt-12 md:mt-0 bg-[var(--bg-base)]">
+      <main className="flex-1 overflow-y-auto relative mt-12 md:mt-0 bg-background">
         {isReadOnly && (
-          <div className="absolute top-0 left-0 right-0 bg-[var(--amber-dim)] text-[var(--amber-muted)] text-center text-xs py-1.5 font-medium z-10 border-b border-[var(--border)] font-['Inter_Tight_Variable']">
+          <div className="sticky top-0 bg-rust/10 text-rust text-center text-xs py-1.5 font-medium z-10 border-b border-rust/20 font-sans">
             Melihat data historis (Read-Only). Aksi dinonaktifkan.
           </div>
         )}
-        <Outlet context={{ 
-          selectedSession, 
-          isReadOnly, 
-          sessionData,
-          updateLocalOrder,
-          refreshSessionData: () => refreshSessionData(selectedSessionId),
-          refreshSessions: () => {
-            apiFetch('/sessions/').then(data => {
-              setSessions(data);
-              if (!selectedSessionId && data.length > 0) {
-                const active = data.find(s => s.status === 'Active');
-                setSelectedSessionId(active ? active.id_po : data[0].id_po);
-              }
-            });
-          } 
-        }} />
+        <div className="p-4 md:p-6">
+          <Outlet context={{ 
+            selectedSession, 
+            isReadOnly, 
+            sessionData,
+            updateLocalOrder,
+            refreshSessionData: () => refreshSessionData(selectedSessionId),
+            refreshSessions: () => {
+              apiFetch('/sessions/').then(data => {
+                setSessions(data);
+                if (!selectedSessionId && data.length > 0) {
+                  const active = data.find(s => s.status === 'Active');
+                  setSelectedSessionId(active ? active.id_po : data[0].id_po);
+                }
+              });
+            } 
+          }} />
+        </div>
       </main>
     </div>
   );

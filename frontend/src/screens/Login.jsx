@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
+import { Input } from '../components/ui/input';
+import { Button } from '../components/ui/button';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -25,57 +28,59 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-gradient-warm flex items-center justify-center p-4">
-      <div className="max-w-sm w-full card shadow-paper border-0">
-        <div className="flex justify-center mb-6">
-          <img src="/logo.png" alt="Dimsavor Logo" className="h-16 w-auto object-contain" />
-        </div>
-        
-        <h2 className="text-center text-[24px] font-['Fraunces'] font-semibold text-[var(--text-primary)] mb-2">
-          Dimsavor
-        </h2>
-        <p className="text-center text-[13px] text-[var(--text-secondary)] font-['Inter_Tight_Variable'] mb-8">
-          Masuk ke sistem operasi Dimsavor.
-        </p>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="form-label">Email</label>
-            <input 
-              type="email" 
-              className="form-input"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="[EMAIL_ADDRESS]"
-              required
-            />
-          </div>
-          <div>
-            <label className="form-label">Password</label>
-            <input 
-              type="password" 
-              className="form-input"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              required
-            />
+      <Card className="max-w-sm w-full shadow-paper border-0">
+        <CardHeader className="text-center pb-2">
+          <div className="flex justify-center mb-6">
+            <img src="/logo.png" alt="Dimsavor Logo" className="h-16 w-auto object-contain" />
           </div>
           
-          {error && (
-            <div className="text-[var(--status-cancelled)] text-[12px] text-center font-['Inter_Tight_Variable']">
-              {error}
+          <CardTitle className="text-[24px] font-display font-semibold text-foreground">
+            Dimsavor
+          </CardTitle>
+          <CardDescription className="text-[13px] font-sans">
+            Masuk ke sistem operasi Dimsavor.
+          </CardDescription>
+        </CardHeader>
+        
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-[13px] font-medium text-foreground">Email</label>
+              <Input 
+                type="email" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="[EMAIL_ADDRESS]"
+                required
+              />
             </div>
-          )}
+            <div className="space-y-2">
+              <label className="text-[13px] font-medium text-foreground">Password</label>
+              <Input 
+                type="password" 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+              />
+            </div>
+            
+            {error && (
+              <div className="text-destructive text-[12px] text-center font-sans">
+                {error}
+              </div>
+            )}
 
-          <button 
-            type="submit" 
-            className="btn-primary w-full mt-2"
-            disabled={isLoading}
-          >
-            {isLoading ? 'Memverifikasi...' : 'Masuk'}
-          </button>
-        </form>
-      </div>
+            <Button 
+              type="submit" 
+              className="w-full mt-2"
+              disabled={isLoading}
+            >
+              {isLoading ? 'Memverifikasi...' : 'Masuk'}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }

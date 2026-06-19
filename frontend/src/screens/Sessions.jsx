@@ -6,6 +6,10 @@ import ConfirmModal from '../components/ConfirmModal';
 import { formatDate } from '../utils/format';
 import { Calendar, Plus } from 'lucide-react';
 import { useToast } from '../contexts/ToastContext';
+import { Button } from '../components/ui/button';
+import { Card, CardContent } from '../components/ui/card';
+import { Input } from '../components/ui/input';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
 
 export default function Sessions() {
   const { refreshSessions } = useOutletContext();
@@ -133,180 +137,175 @@ export default function Sessions() {
   return (
     <div className="max-w-5xl mx-auto space-y-[20px]">
       <div className="flex justify-between items-center mb-2">
-        <h1 className="text-[24px] font-semibold text-[var(--text-primary)] font-['Fraunces']">PO Sessions</h1>
-        <button
+        <h1 className="text-[24px] font-semibold text-foreground font-display">PO Sessions</h1>
+        <Button
           onClick={() => setIsModalOpen(true)}
           disabled={hasActiveSession}
-          className={`flex items-center gap-[6px] h-[36px] px-[16px] rounded-[6px] font-['Inter_Tight_Variable'] font-medium text-[13px] transition-colors ${
-            hasActiveSession 
-              ? 'bg-[var(--bg-muted)] text-[var(--text-disabled)] cursor-not-allowed border border-[var(--border)]' 
-              : 'bg-[var(--amber)] text-black hover:bg-[#d97706]'
-          }`}
+          className="flex items-center gap-[6px] h-[36px] px-[16px] rounded-[6px]"
         >
           <Plus className="w-4 h-4" />
           New Session
-        </button>
+        </Button>
       </div>
 
-      <div className="card overflow-x-auto p-0">
-        <table className="min-w-full border-collapse text-left">
-          <thead>
-            <tr>
-              <th className="table-header-cell">ID</th>
-              <th className="table-header-cell">Tanggal Buka</th>
-              <th className="table-header-cell">Tanggal Tutup</th>
-              <th className="table-header-cell">Kuota</th>
-              <th className="table-header-cell">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sessions.map(session => (
-              <React.Fragment key={session.id_po}>
-                <tr 
-                  className={`table-row cursor-pointer ${expandedSessionId === session.id_po ? 'bg-[var(--bg-muted)]' : ''}`}
-                  onClick={() => toggleExpand(session.id_po)}
-                >
-                  <td className="table-cell font-['JetBrains_Mono'] font-medium text-[var(--text-primary)]">PO-{session.id_po}</td>
-                  <td className="table-cell text-[var(--text-secondary)]">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="w-3 h-3 text-[var(--text-disabled)]" />
-                      {formatDate(session.tanggal_buka)}
-                    </div>
-                  </td>
-                  <td className="table-cell text-[var(--text-secondary)]">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="w-3 h-3 text-[var(--text-disabled)]" />
-                      {formatDate(session.tanggal_tutup)}
-                    </div>
-                  </td>
-                  <td className="table-cell text-[var(--text-secondary)]">
-                    <span className="font-['JetBrains_Mono']">{session.kuota_maksimal}</span> box
-                  </td>
-                  <td className="table-cell">
-                    <StatusBadge status={session.status} />
-                  </td>
-                </tr>
-                {/* Expandable slots panel */}
-                {expandedSessionId === session.id_po && (
-                  <tr className="bg-[var(--bg-muted)] border-b border-[var(--border)]">
-                    <td colSpan="5" className="px-[24px] py-[16px]">
-                      <div className="mb-[12px] font-medium text-[var(--text-secondary)] text-[12px] uppercase tracking-wider">
-                        Delivery Slots untuk PO-{session.id_po}
+      <Card className="overflow-hidden">
+        <CardContent className="p-0 overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-muted/50 hover:bg-muted/50">
+                <TableHead className="text-muted-foreground uppercase text-[11px] font-medium tracking-wider">ID</TableHead>
+                <TableHead className="text-muted-foreground uppercase text-[11px] font-medium tracking-wider">Tanggal Buka</TableHead>
+                <TableHead className="text-muted-foreground uppercase text-[11px] font-medium tracking-wider">Tanggal Tutup</TableHead>
+                <TableHead className="text-muted-foreground uppercase text-[11px] font-medium tracking-wider">Kuota</TableHead>
+                <TableHead className="text-muted-foreground uppercase text-[11px] font-medium tracking-wider">Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {sessions.map(session => (
+                <React.Fragment key={session.id_po}>
+                  <TableRow 
+                    className={`cursor-pointer ${expandedSessionId === session.id_po ? 'bg-muted/50' : ''}`}
+                    onClick={() => toggleExpand(session.id_po)}
+                  >
+                    <TableCell className="font-mono font-medium text-foreground">PO-{session.id_po}</TableCell>
+                    <TableCell className="text-muted-foreground">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-3 h-3 text-muted-foreground/60" />
+                        {formatDate(session.tanggal_buka)}
                       </div>
-                      <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-[6px] overflow-hidden">
-                        <table className="min-w-full text-left">
-                          <thead className="bg-[var(--bg-elevated)] border-b border-[var(--border)]">
-                            <tr>
-                              <th className="px-[16px] py-[8px] text-[12px] font-medium text-[var(--text-secondary)]">Jadwal</th>
-                              <th className="px-[16px] py-[8px] text-[12px] font-medium text-[var(--text-secondary)] text-center">Gratis Ongkir</th>
-                              <th className="px-[16px] py-[8px] text-[12px] font-medium text-[var(--text-secondary)] text-right">Aksi</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-[var(--border)]">
-                            {slots.map(slot => (
-                              <tr key={slot.id_slot} className="hover:bg-[var(--bg-muted)]">
-                                <td className="px-[16px] py-[12px] text-[13px] text-[var(--text-primary)] font-medium">{slot.jadwal_teks}</td>
-                                <td className="px-[16px] py-[12px] text-center">
-                                  <button 
-                                    onClick={() => handleToggleOngkir(slot.id_slot, slot.is_free_ongkir)}
-                                    className={`px-[8px] py-[2px] rounded-[4px] text-[11px] font-['JetBrains_Mono'] font-medium border ${
-                                      slot.is_free_ongkir 
-                                        ? 'bg-[var(--status-sent)]/10 text-[var(--status-sent)] border-[var(--status-sent)]/30' 
-                                        : 'bg-[var(--bg-elevated)] text-[var(--text-disabled)] border-[var(--border)]'
-                                    }`}
-                                  >
-                                    {slot.is_free_ongkir ? 'ON' : 'OFF'}
-                                  </button>
-                                </td>
-                                <td className="px-[16px] py-[12px] text-right">
-                                  <button onClick={() => setSlotToDelete(slot)} className="text-[var(--status-cancelled)] hover:underline text-[12px]">Hapus</button>
-                                </td>
-                              </tr>
-                            ))}
-                            {/* Add new slot row */}
-                            {session.status === 'Active' && (
-                              <tr className="bg-[var(--bg-elevated)]">
-                                <td className="px-[16px] py-[8px]">
-                                  <input 
-                                    type="text" 
-                                    className="form-input h-[32px] text-[13px]" 
-                                    placeholder="Contoh: Rabu 17 Juni 10.00-13.00"
-                                    value={newSlotJadwal}
-                                    onChange={(e) => setNewSlotJadwal(e.target.value)}
-                                  />
-                                </td>
-                                <td className="px-[16px] py-[8px] text-center text-[12px] text-[var(--text-disabled)] font-['JetBrains_Mono']">
-                                  OFF (default)
-                                </td>
-                                <td className="px-[16px] py-[8px] text-right">
-                                  <button onClick={handleAddSlot} disabled={!newSlotJadwal.trim()} className="text-[var(--amber)] font-medium hover:underline disabled:text-[var(--text-disabled)] text-[12px]">
-                                    Simpan
-                                  </button>
-                                </td>
-                              </tr>
-                            )}
-                          </tbody>
-                        </table>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-3 h-3 text-muted-foreground/60" />
+                        {formatDate(session.tanggal_tutup)}
                       </div>
-                    </td>
-                  </tr>
-                )}
-              </React.Fragment>
-            ))}
-            {sessions.length === 0 && (
-              <tr className="table-row">
-                <td colSpan="5" className="table-cell text-center text-[var(--text-secondary)]">Belum ada sesi PO.</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      <span className="font-mono">{session.kuota_maksimal}</span> box
+                    </TableCell>
+                    <TableCell>
+                      <StatusBadge status={session.status} />
+                    </TableCell>
+                  </TableRow>
+                  {/* Expandable slots panel */}
+                  {expandedSessionId === session.id_po && (
+                    <TableRow className="bg-muted/50 hover:bg-muted/50 border-b border-border">
+                      <TableCell colSpan={5} className="px-[24px] py-[16px]">
+                        <div className="mb-[12px] font-medium text-muted-foreground text-[12px] uppercase tracking-wider">
+                          Delivery Slots untuk PO-{session.id_po}
+                        </div>
+                        <div className="bg-card border border-border rounded-[6px] overflow-hidden">
+                          <Table>
+                            <TableHeader className="bg-muted/30">
+                              <TableRow>
+                                <TableHead className="text-[12px] font-medium text-muted-foreground">Jadwal</TableHead>
+                                <TableHead className="text-[12px] font-medium text-muted-foreground text-center">Gratis Ongkir</TableHead>
+                                <TableHead className="text-[12px] font-medium text-muted-foreground text-right">Aksi</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody className="divide-y divide-border">
+                              {slots.map(slot => (
+                                <TableRow key={slot.id_slot} className="hover:bg-muted/50 border-border">
+                                  <TableCell className="text-[13px] text-foreground font-medium">{slot.jadwal_teks}</TableCell>
+                                  <TableCell className="text-center">
+                                    <button 
+                                      onClick={() => handleToggleOngkir(slot.id_slot, slot.is_free_ongkir)}
+                                      className={`px-[8px] py-[2px] rounded-[4px] text-[11px] font-mono font-medium border ${
+                                        slot.is_free_ongkir 
+                                          ? 'bg-sent/10 text-sent border-sent/30' 
+                                          : 'bg-muted text-muted-foreground border-border'
+                                      }`}
+                                    >
+                                      {slot.is_free_ongkir ? 'ON' : 'OFF'}
+                                    </button>
+                                  </TableCell>
+                                  <TableCell className="text-right">
+                                    <button onClick={() => setSlotToDelete(slot)} className="text-destructive hover:underline text-[12px]">Hapus</button>
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                              {/* Add new slot row */}
+                              {session.status === 'Active' && (
+                                <TableRow className="bg-muted/30">
+                                  <TableCell>
+                                    <Input 
+                                      type="text" 
+                                      className="h-[32px] text-[13px] bg-background" 
+                                      placeholder="Contoh: Rabu 17 Juni 10.00-13.00"
+                                      value={newSlotJadwal}
+                                      onChange={(e) => setNewSlotJadwal(e.target.value)}
+                                    />
+                                  </TableCell>
+                                  <TableCell className="text-center text-[12px] text-muted-foreground font-mono">
+                                    OFF (default)
+                                  </TableCell>
+                                  <TableCell className="text-right">
+                                    <button onClick={handleAddSlot} disabled={!newSlotJadwal.trim()} className="text-terracotta font-medium hover:underline disabled:text-muted-foreground/50 text-[12px]">
+                                      Simpan
+                                    </button>
+                                  </TableCell>
+                                </TableRow>
+                              )}
+                            </TableBody>
+                          </Table>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </React.Fragment>
+              ))}
+              {sessions.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center text-muted-foreground py-8">Belum ada sesi PO.</TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
 
       {/* Create Session Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-[var(--text-primary)]/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-[14px] shadow-paper w-full max-w-md p-[24px]">
-            <h2 className="text-[18px] font-bold mb-[20px] font-['Fraunces'] text-[var(--text-primary)]">Buat Sesi PO Baru</h2>
+        <div className="fixed inset-0 bg-foreground/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-card border border-border rounded-[14px] shadow-paper w-full max-w-md p-[24px]">
+            <h2 className="text-[18px] font-bold mb-[20px] font-display text-foreground">Buat Sesi PO Baru</h2>
             <form onSubmit={handleCreateSession} className="space-y-[16px]">
-              <div>
-                <label className="form-label">Tanggal Buka</label>
-                <input 
+              <div className="space-y-2">
+                <label className="text-[13px] font-medium text-foreground">Tanggal Buka</label>
+                <Input 
                   type="date" 
                   required
-                  className="form-input" 
                   value={newSession.tanggal_buka}
                   onChange={e => setNewSession({...newSession, tanggal_buka: e.target.value})}
                 />
               </div>
-              <div>
-                <label className="form-label">Tanggal Tutup</label>
-                <input 
+              <div className="space-y-2">
+                <label className="text-[13px] font-medium text-foreground">Tanggal Tutup</label>
+                <Input 
                   type="date" 
                   required
-                  className="form-input" 
                   value={newSession.tanggal_tutup}
                   onChange={e => setNewSession({...newSession, tanggal_tutup: e.target.value})}
                 />
               </div>
-              <div>
-                <label className="form-label">Kuota Maksimal (Box Dimsum)</label>
-                <input 
+              <div className="space-y-2">
+                <label className="text-[13px] font-medium text-foreground">Kuota Maksimal (Box Dimsum)</label>
+                <Input 
                   type="number" 
                   min="1"
                   required
-                  className="form-input" 
                   value={newSession.kuota_maksimal}
                   onChange={e => setNewSession({...newSession, kuota_maksimal: parseInt(e.target.value)})}
                 />
-                <p className="text-[11px] text-[var(--text-disabled)] mt-[6px]">Bacar tidak dihitung dalam kuota.</p>
+                <p className="text-[11px] text-muted-foreground mt-[6px]">Bacar tidak dihitung dalam kuota.</p>
               </div>
-              <div className="flex justify-end space-x-[12px] mt-[24px] pt-[16px] border-t border-[var(--border)]">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="btn-secondary">
+              <div className="flex justify-end space-x-[12px] mt-[24px] pt-[16px] border-t border-border">
+                <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)}>
                   Batal
-                </button>
-                <button type="submit" className="btn-primary">
+                </Button>
+                <Button type="submit">
                   Buat Sesi
-                </button>
+                </Button>
               </div>
             </form>
           </div>

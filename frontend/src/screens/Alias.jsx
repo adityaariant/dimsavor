@@ -2,6 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { apiFetch } from '../api/client';
 import ConfirmModal from '../components/ConfirmModal';
 import { useToast } from '../contexts/ToastContext';
+import { Button } from '../components/ui/button';
+import { Card, CardContent } from '../components/ui/card';
+import { Input } from '../components/ui/input';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
+import { Badge } from '../components/ui/badge';
+import { Search } from 'lucide-react';
 
 export default function Alias() {
   const { showToast } = useToast();
@@ -113,16 +119,16 @@ export default function Alias() {
   return (
     <div className="max-w-5xl mx-auto space-y-[24px]">
       <div className="flex justify-between items-center mb-[12px]">
-        <h1 className="text-[24px] font-semibold text-[var(--text-primary)] font-['Fraunces']">Dictionary Manager</h1>
-        <div className="bg-[var(--bg-muted)] p-[4px] rounded-[8px] border border-[var(--border)] flex font-['Inter_Tight_Variable']">
+        <h1 className="text-[24px] font-semibold text-foreground font-display">Dictionary Manager</h1>
+        <div className="bg-muted p-[4px] rounded-lg border border-border flex font-sans">
           <button 
-            className={`px-[16px] py-[6px] rounded-[6px] text-[13px] font-medium transition-colors ${activeTab === 'alias' ? 'bg-[var(--bg-surface)] shadow-soft text-[var(--text-primary)] border border-[var(--border)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-transparent'}`}
+            className={`px-[16px] py-[6px] rounded-[6px] text-[13px] font-medium transition-colors ${activeTab === 'alias' ? 'bg-background shadow-soft text-foreground border border-border' : 'text-muted-foreground hover:text-foreground border border-transparent'}`}
             onClick={() => setActiveTab('alias')}
           >
             Product Aliases
           </button>
           <button 
-            className={`px-[16px] py-[6px] rounded-[6px] text-[13px] font-medium transition-colors ${activeTab === 'area' ? 'bg-[var(--bg-surface)] shadow-soft text-[var(--text-primary)] border border-[var(--border)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-transparent'}`}
+            className={`px-[16px] py-[6px] rounded-[6px] text-[13px] font-medium transition-colors ${activeTab === 'area' ? 'bg-background shadow-soft text-foreground border border-border' : 'text-muted-foreground hover:text-foreground border border-transparent'}`}
             onClick={() => setActiveTab('area')}
           >
             Area Keywords
@@ -130,98 +136,105 @@ export default function Alias() {
         </div>
       </div>
 
-      <div className="flex justify-between items-center bg-[var(--bg-surface)] p-[16px] rounded-[10px] shadow-soft border border-[var(--border)]">
-        <input 
-          type="text" 
-          placeholder="Cari kata kunci..." 
-          className="form-input w-full md:w-[280px]"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-        />
+      <div className="flex justify-between items-center bg-card p-[16px] rounded-lg shadow-soft border border-border">
+        <div className="relative w-full md:w-[280px]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input 
+            type="text" 
+            placeholder="Cari kata kunci..." 
+            className="pl-9"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+        </div>
       </div>
 
       {activeTab === 'alias' && (
-        <div className="card overflow-x-auto p-0">
-          <table className="min-w-full text-left border-collapse">
-            <thead>
-              <tr>
-                <th className="table-header-cell w-1/3">Kata Kunci (slang)</th>
-                <th className="table-header-cell w-1/3">Nama Produk Baku</th>
-                <th className="table-header-cell w-1/6">Kitchen Code</th>
-                <th className="table-header-cell w-1/6 text-right">Aksi</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[var(--border)]">
-              {filteredAliases.map(alias => (
-                <tr key={alias.id_alias} className="table-row">
-                  {editingAliasId === alias.id_alias ? (
-                    <>
-                      <td className="table-cell"><input className="form-input h-[28px] text-[13px]" value={editingAliasData.kata_kunci} onChange={e => setEditingAliasData({...editingAliasData, kata_kunci: e.target.value})} /></td>
-                      <td className="table-cell"><input className="form-input h-[28px] text-[13px]" value={editingAliasData.nama_produk_baku} onChange={e => setEditingAliasData({...editingAliasData, nama_produk_baku: e.target.value})} /></td>
-                      <td className="table-cell"><input className="form-input h-[28px] text-[13px]" value={editingAliasData.kitchen_code} onChange={e => setEditingAliasData({...editingAliasData, kitchen_code: e.target.value})} /></td>
-                      <td className="table-cell text-right space-x-2">
-                        <button onClick={handleSaveAlias} className="text-[var(--amber)] font-medium hover:underline text-[12px]">Simpan</button>
-                        <button onClick={() => setEditingAliasId(null)} className="text-[var(--text-secondary)] hover:underline text-[12px]">Batal</button>
-                      </td>
-                    </>
-                  ) : (
-                    <>
-                      <td className="table-cell font-['JetBrains_Mono'] text-[var(--text-primary)] bg-[var(--bg-muted)] border-r border-[var(--border)]">{alias.kata_kunci}</td>
-                      <td className="table-cell text-[var(--text-secondary)]">{alias.nama_produk_baku}</td>
-                      <td className="table-cell font-['JetBrains_Mono'] font-medium">{alias.kitchen_code}</td>
-                      <td className="table-cell text-right space-x-3">
-                        <button onClick={() => startEditAlias(alias)} className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:underline text-[12px]">Edit</button>
-                        <button onClick={() => { setDeleteId(alias.id_alias); setDeleteType('alias'); }} className="text-[var(--status-cancelled)] hover:underline text-[12px]">Hapus</button>
-                      </td>
-                    </>
-                  )}
-                </tr>
-              ))}
-              <tr className="bg-[var(--bg-elevated)] border-t border-[var(--border)]">
-                <td className="table-cell py-[12px]"><input placeholder="e.g. badil" className="form-input h-[32px] text-[13px]" value={newAlias.kata_kunci} onChange={e => setNewAlias({...newAlias, kata_kunci: e.target.value})} /></td>
-                <td className="table-cell py-[12px]"><input placeholder="e.g. BAdil" className="form-input h-[32px] text-[13px]" value={newAlias.nama_produk_baku} onChange={e => setNewAlias({...newAlias, nama_produk_baku: e.target.value})} /></td>
-                <td className="table-cell py-[12px]"><input placeholder="e.g. BD" className="form-input h-[32px] text-[13px]" value={newAlias.kitchen_code} onChange={e => setNewAlias({...newAlias, kitchen_code: e.target.value})} /></td>
-                <td className="table-cell py-[12px] text-right">
-                  <button onClick={handleAddAlias} className="bg-[var(--amber-dim)] text-[var(--amber)] px-[12px] py-[6px] rounded-[4px] font-medium hover:bg-[var(--amber)] hover:text-[var(--bg-base)] transition-colors text-[12px]">Tambah</button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        <Card className="overflow-hidden">
+          <CardContent className="p-0 overflow-x-auto">
+            <Table>
+              <TableHeader className="bg-muted/50">
+                <TableRow>
+                  <TableHead className="w-1/3">Kata Kunci (slang)</TableHead>
+                  <TableHead className="w-1/3">Nama Produk Baku</TableHead>
+                  <TableHead className="w-1/6">Kitchen Code</TableHead>
+                  <TableHead className="w-1/6 text-right">Aksi</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredAliases.map(alias => (
+                  <TableRow key={alias.id_alias}>
+                    {editingAliasId === alias.id_alias ? (
+                      <>
+                        <TableCell><Input className="h-[28px] text-[13px]" value={editingAliasData.kata_kunci} onChange={e => setEditingAliasData({...editingAliasData, kata_kunci: e.target.value})} /></TableCell>
+                        <TableCell><Input className="h-[28px] text-[13px]" value={editingAliasData.nama_produk_baku} onChange={e => setEditingAliasData({...editingAliasData, nama_produk_baku: e.target.value})} /></TableCell>
+                        <TableCell><Input className="h-[28px] text-[13px]" value={editingAliasData.kitchen_code} onChange={e => setEditingAliasData({...editingAliasData, kitchen_code: e.target.value})} /></TableCell>
+                        <TableCell className="text-right space-x-2">
+                          <button onClick={handleSaveAlias} className="text-terracotta font-medium hover:underline text-[12px]">Simpan</button>
+                          <button onClick={() => setEditingAliasId(null)} className="text-muted-foreground hover:underline text-[12px]">Batal</button>
+                        </TableCell>
+                      </>
+                    ) : (
+                      <>
+                        <TableCell className="font-mono text-foreground bg-muted/30 border-r border-border">{alias.kata_kunci}</TableCell>
+                        <TableCell className="text-muted-foreground">{alias.nama_produk_baku}</TableCell>
+                        <TableCell className="font-mono font-medium">{alias.kitchen_code}</TableCell>
+                        <TableCell className="text-right space-x-3">
+                          <button onClick={() => startEditAlias(alias)} className="text-muted-foreground hover:text-foreground hover:underline text-[12px]">Edit</button>
+                          <button onClick={() => { setDeleteId(alias.id_alias); setDeleteType('alias'); }} className="text-destructive hover:underline text-[12px]">Hapus</button>
+                        </TableCell>
+                      </>
+                    )}
+                  </TableRow>
+                ))}
+                <TableRow className="bg-muted/30 border-t border-border hover:bg-muted/30">
+                  <TableCell className="py-[12px]"><Input placeholder="e.g. badil" className="h-[32px] text-[13px] bg-background" value={newAlias.kata_kunci} onChange={e => setNewAlias({...newAlias, kata_kunci: e.target.value})} /></TableCell>
+                  <TableCell className="py-[12px]"><Input placeholder="e.g. BAdil" className="h-[32px] text-[13px] bg-background" value={newAlias.nama_produk_baku} onChange={e => setNewAlias({...newAlias, nama_produk_baku: e.target.value})} /></TableCell>
+                  <TableCell className="py-[12px]"><Input placeholder="e.g. BD" className="h-[32px] text-[13px] bg-background" value={newAlias.kitchen_code} onChange={e => setNewAlias({...newAlias, kitchen_code: e.target.value})} /></TableCell>
+                  <TableCell className="py-[12px] text-right">
+                    <Button onClick={handleAddAlias} size="sm" variant="secondary" className="bg-amber/20 text-amber hover:bg-amber hover:text-white">Tambah</Button>
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
       )}
 
       {activeTab === 'area' && (
-        <div className="card overflow-x-auto p-0">
-          <table className="min-w-full text-left border-collapse">
-            <thead>
-              <tr>
-                <th className="table-header-cell w-1/2">Keyword (WA text)</th>
-                <th className="table-header-cell w-1/3">Area Tag Resmi</th>
-                <th className="table-header-cell text-right">Aksi</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[var(--border)]">
-              {filteredAreas.map(area => (
-                <tr key={area.id_keyword} className="table-row">
-                  <td className="table-cell font-['JetBrains_Mono'] text-[var(--text-primary)] bg-[var(--bg-muted)] border-r border-[var(--border)]">{area.keyword}</td>
-                  <td className="table-cell">
-                    <span className="bg-[var(--amber-dim)] border border-[var(--amber)] text-[var(--amber)] px-[8px] py-[4px] rounded-[6px] text-[11px] font-medium font-['Inter_Tight_Variable'] shadow-sm">🏷️ {area.area_tag}</span>
-                  </td>
-                  <td className="table-cell text-right">
-                    <button onClick={() => { setDeleteId(area.id_keyword); setDeleteType('area'); }} className="text-[var(--status-cancelled)] hover:underline text-[12px]">Hapus</button>
-                  </td>
-                </tr>
-              ))}
-              <tr className="bg-[var(--bg-elevated)] border-t border-[var(--border)]">
-                <td className="table-cell py-[12px]"><input placeholder="e.g. itz" className="form-input h-[32px] text-[13px]" value={newArea.keyword} onChange={e => setNewArea({...newArea, keyword: e.target.value})} /></td>
-                <td className="table-cell py-[12px]"><input placeholder="e.g. ITS" className="form-input h-[32px] text-[13px]" value={newArea.area_tag} onChange={e => setNewArea({...newArea, area_tag: e.target.value})} /></td>
-                <td className="table-cell py-[12px] text-right">
-                  <button onClick={handleAddArea} className="bg-[var(--amber-dim)] text-[var(--amber)] px-[12px] py-[6px] rounded-[4px] font-medium hover:bg-[var(--amber)] hover:text-[var(--bg-base)] transition-colors text-[12px]">Tambah</button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        <Card className="overflow-hidden">
+          <CardContent className="p-0 overflow-x-auto">
+            <Table>
+              <TableHeader className="bg-muted/50">
+                <TableRow>
+                  <TableHead className="w-1/2">Keyword (WA text)</TableHead>
+                  <TableHead className="w-1/3">Area Tag Resmi</TableHead>
+                  <TableHead className="text-right">Aksi</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredAreas.map(area => (
+                  <TableRow key={area.id_keyword}>
+                    <TableCell className="font-mono text-foreground bg-muted/30 border-r border-border">{area.keyword}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="bg-amber/10 border-amber text-amber font-medium shadow-sm font-sans">🏷️ {area.area_tag}</Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <button onClick={() => { setDeleteId(area.id_keyword); setDeleteType('area'); }} className="text-destructive hover:underline text-[12px]">Hapus</button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                <TableRow className="bg-muted/30 border-t border-border hover:bg-muted/30">
+                  <TableCell className="py-[12px]"><Input placeholder="e.g. itz" className="h-[32px] text-[13px] bg-background" value={newArea.keyword} onChange={e => setNewArea({...newArea, keyword: e.target.value})} /></TableCell>
+                  <TableCell className="py-[12px]"><Input placeholder="e.g. ITS" className="h-[32px] text-[13px] bg-background" value={newArea.area_tag} onChange={e => setNewArea({...newArea, area_tag: e.target.value})} /></TableCell>
+                  <TableCell className="py-[12px] text-right">
+                    <Button onClick={handleAddArea} size="sm" variant="secondary" className="bg-amber/20 text-amber hover:bg-amber hover:text-white">Tambah</Button>
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
       )}
 
       <ConfirmModal

@@ -5,6 +5,12 @@ import { useAuth } from '../contexts/AuthContext';
 import ConfirmModal from '../components/ConfirmModal';
 import { formatRupiah } from '../utils/format';
 import { useToast } from '../contexts/ToastContext';
+import { Button } from '../components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import { Input } from '../components/ui/input';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
+import { Badge } from '../components/ui/badge';
+import { Banknote, Lock } from 'lucide-react';
 
 export default function Finance() {
   const { selectedSession: session, refreshSessions, sessionData, refreshSessionData } = useOutletContext();
@@ -83,194 +89,206 @@ export default function Finance() {
     <div className="max-w-6xl mx-auto space-y-[20px]">
       <div className="flex justify-between items-center mb-2">
         <div>
-          <h1 className="text-[24px] font-semibold text-[var(--text-primary)] font-['Fraunces']">
+          <h1 className="text-[24px] font-semibold text-foreground font-display flex items-center gap-3">
             Finance & Profit Split 
-            <span className="text-[var(--text-secondary)] font-normal text-[18px] ml-2 font-['Inter_Tight_Variable']">(PO-{session.id_po})</span>
+            <span className="text-muted-foreground font-normal text-[18px] font-sans">(PO-{session.id_po})</span>
           </h1>
         </div>
         {isClosed && (
-          <span className="badge badge-pending">
-            🔒 Batch Ditutup
-          </span>
+          <Badge variant="outline" className="bg-muted text-muted-foreground border-border gap-1">
+            <Lock className="w-3 h-3" /> Batch Ditutup
+          </Badge>
         )}
       </div>
 
       <div className="flex flex-col lg:flex-row gap-[20px] items-start">
         {/* Expense Tracker */}
-        <div className="card w-full lg:w-1/2">
-          <div className="card-header">Pengeluaran</div>
-          
-          <div className="overflow-x-auto mb-4 border border-[var(--border)] rounded-[6px]">
-            <table className="min-w-full text-left border-collapse">
-              <thead>
-                <tr>
-                  <th className="table-header-cell">Nama Bahan</th>
-                  <th className="table-header-cell">Nominal</th>
-                  <th className="table-header-cell">Dibayar</th>
-                  {!isClosed && <th className="table-header-cell text-right w-[40px]"></th>}
-                </tr>
-              </thead>
-              <tbody>
-                {expenses.map(exp => (
-                  <tr key={exp.id_expense} className="table-row">
-                    <td className="table-cell">{exp.nama_bahan}</td>
-                    <td className="table-cell font-['JetBrains_Mono'] text-[12px]">{formatRupiah(exp.nominal)}</td>
-                    <td className="table-cell text-[var(--text-secondary)]">{exp.dibayar_oleh}</td>
-                    {!isClosed && (
-                      <td className="table-cell text-right">
-                        <button onClick={() => handleDeleteExpense(exp.id_expense)} className="text-[var(--status-cancelled)] hover:underline text-[12px]">Hapus</button>
-                      </td>
-                    )}
-                  </tr>
-                ))}
-                {!isClosed && (
-                  <tr className="bg-[var(--bg-elevated)] border-t border-[var(--border)]">
-                    <td className="table-cell py-2">
-                      <input 
-                        type="text" 
-                        placeholder="Bahan..." 
-                        className="form-input h-[28px] text-[12px]"
-                        value={newExpense.nama_bahan}
-                        onChange={e => setNewExpense({...newExpense, nama_bahan: e.target.value})}
-                      />
-                    </td>
-                    <td className="table-cell py-2">
-                      <input 
-                        type="number" 
-                        placeholder="Rp..." 
-                        className="form-input h-[28px] text-[12px] font-['JetBrains_Mono']"
-                        value={newExpense.nominal}
-                        onChange={e => setNewExpense({...newExpense, nominal: e.target.value})}
-                      />
-                    </td>
-                    <td className="table-cell py-2">
-                      <select 
-                        className="form-select h-[28px] text-[12px]"
-                        value={newExpense.dibayar_oleh}
-                        onChange={e => setNewExpense({...newExpense, dibayar_oleh: e.target.value})}
-                      >
-                        <option>Adit</option>
-                        <option>Kila</option>
-                      </select>
-                    </td>
-                    <td className="table-cell text-right py-2">
-                      <button onClick={handleAddExpense} className="text-[var(--amber)] font-medium hover:underline text-[12px] whitespace-nowrap">Simpan</button>
-                    </td>
-                  </tr>
-                )}
-                {expenses.length === 0 && (
-                  <tr className="table-row">
-                    <td colSpan="4" className="table-cell text-center text-[var(--text-secondary)]">Belum ada pengeluaran.</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-          
-          <div className="bg-[var(--bg-elevated)] p-[12px] rounded-[10px] shadow-soft border border-[var(--border)] font-['Inter_Tight_Variable'] text-[13px] space-y-[4px]">
-            <div className="flex justify-between text-[var(--text-secondary)]"><span>Adit total:</span> <span className="font-['JetBrains_Mono'] text-[12px] text-[var(--text-primary)]">{formatRupiah(aditTotal)}</span></div>
-            <div className="flex justify-between text-[var(--text-secondary)]"><span>Kila total:</span> <span className="font-['JetBrains_Mono'] text-[12px] text-[var(--text-primary)]">{formatRupiah(kilaTotal)}</span></div>
-            <div className="flex justify-between font-bold text-[var(--text-primary)] border-t border-[var(--border)] pt-[8px] mt-[8px]"><span>Total Modal:</span> <span className="font-['JetBrains_Mono'] text-[12px]">{formatRupiah(preview?.total_modal || 0)}</span></div>
-          </div>
-        </div>
-
-        {/* Profit Split Preview */}
-        <div className="card w-full lg:w-1/2 lg:sticky top-[20px]">
-          <div className="card-header">Kalkulasi Bagi Hasil</div>
-          
-          <div className="space-y-[8px] font-['Inter_Tight_Variable'] text-[14px]">
-            <div className="flex justify-between text-[var(--text-secondary)]">
-              <span>Total Pendapatan (PAID)</span>
-              <span className="font-medium text-[var(--text-primary)] font-['JetBrains_Mono'] text-[13px]">{formatRupiah(preview?.total_revenue || 0)}</span>
-            </div>
-            <div className="flex justify-between text-[var(--status-cancelled)]">
-              <span>Total Modal</span>
-              <span className="font-['JetBrains_Mono'] text-[13px]">- {formatRupiah(preview?.total_modal || 0)}</span>
+        <Card className="w-full lg:w-1/2">
+          <CardHeader className="pb-3 border-b border-border mb-4">
+            <CardTitle className="text-lg">Pengeluaran</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto mb-4 border border-border rounded-md">
+              <Table>
+                <TableHeader className="bg-muted/50">
+                  <TableRow>
+                    <TableHead className="text-muted-foreground">Nama Bahan</TableHead>
+                    <TableHead className="text-muted-foreground">Nominal</TableHead>
+                    <TableHead className="text-muted-foreground">Dibayar</TableHead>
+                    {!isClosed && <TableHead className="text-right w-[60px]"></TableHead>}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {expenses.map(exp => (
+                    <TableRow key={exp.id_expense}>
+                      <TableCell className="font-medium">{exp.nama_bahan}</TableCell>
+                      <TableCell className="font-mono text-[12px] text-muted-foreground">{formatRupiah(exp.nominal)}</TableCell>
+                      <TableCell className="text-muted-foreground">{exp.dibayar_oleh}</TableCell>
+                      {!isClosed && (
+                        <TableCell className="text-right">
+                          <button onClick={() => handleDeleteExpense(exp.id_expense)} className="text-destructive hover:underline text-[12px]">Hapus</button>
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  ))}
+                  {!isClosed && (
+                    <TableRow className="bg-muted/30 hover:bg-muted/30">
+                      <TableCell className="p-2">
+                        <Input 
+                          type="text" 
+                          placeholder="Bahan..." 
+                          className="h-8 text-[12px] bg-background"
+                          value={newExpense.nama_bahan}
+                          onChange={e => setNewExpense({...newExpense, nama_bahan: e.target.value})}
+                        />
+                      </TableCell>
+                      <TableCell className="p-2">
+                        <Input 
+                          type="number" 
+                          placeholder="Rp..." 
+                          className="h-8 text-[12px] font-mono bg-background"
+                          value={newExpense.nominal}
+                          onChange={e => setNewExpense({...newExpense, nominal: e.target.value})}
+                        />
+                      </TableCell>
+                      <TableCell className="p-2">
+                        <select 
+                          className="flex h-8 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 text-[12px]"
+                          value={newExpense.dibayar_oleh}
+                          onChange={e => setNewExpense({...newExpense, dibayar_oleh: e.target.value})}
+                        >
+                          <option>Adit</option>
+                          <option>Kila</option>
+                        </select>
+                      </TableCell>
+                      <TableCell className="text-right p-2">
+                        <button onClick={handleAddExpense} className="text-terracotta font-medium hover:underline text-[12px] whitespace-nowrap">Simpan</button>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                  {expenses.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={4} className="text-center text-muted-foreground py-8">Belum ada pengeluaran.</TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
             </div>
             
-            <div className="flex justify-between font-bold border-t border-[var(--border)] pt-[16px] mt-[16px]">
-              <span className="text-[var(--text-primary)]">Laba Bersih</span>
-              <span className="text-[32px] text-[var(--amber)] font-['Fraunces'] leading-none">
-                {formatRupiah(preview?.laba_bersih || 0)}
-              </span>
+            <div className="bg-muted p-[12px] rounded-lg border border-border font-sans text-[13px] space-y-[4px]">
+              <div className="flex justify-between text-muted-foreground"><span>Adit total:</span> <span className="font-mono text-[12px] text-foreground">{formatRupiah(aditTotal)}</span></div>
+              <div className="flex justify-between text-muted-foreground"><span>Kila total:</span> <span className="font-mono text-[12px] text-foreground">{formatRupiah(kilaTotal)}</span></div>
+              <div className="flex justify-between font-bold text-foreground border-t border-border pt-[8px] mt-[8px]"><span>Total Modal:</span> <span className="font-mono text-[12px]">{formatRupiah(preview?.total_modal || 0)}</span></div>
             </div>
-          </div>
+          </CardContent>
+        </Card>
 
-          <div className="mt-[24px] space-y-[12px]">
-            <div className="bg-[var(--bg-elevated)] p-[16px] rounded-[10px] shadow-soft border border-[var(--border)]">
-              <div className="text-[var(--text-secondary)] font-['Inter_Tight_Variable'] text-[11px] uppercase tracking-wider mb-[4px]">Porsi Adit</div>
-              <div className="flex justify-between items-end">
-                <div className="text-[11px] text-[var(--text-secondary)] font-['JetBrains_Mono']">
-                  {formatRupiah(aditTotal)} <span className="font-['Inter_Tight_Variable']">(modal)</span> + {formatRupiah((preview?.laba_bersih || 0) / 2)} <span className="font-['Inter_Tight_Variable']">(laba ÷ 2)</span>
+        {/* Profit Split Preview */}
+        <div className="w-full lg:w-1/2 lg:sticky top-[20px]">
+          <Card>
+            <CardHeader className="pb-3 border-b border-border mb-4">
+              <CardTitle className="text-lg">Kalkulasi Bagi Hasil</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-[8px] font-sans text-[14px]">
+                <div className="flex justify-between text-muted-foreground">
+                  <span>Total Pendapatan (PAID)</span>
+                  <span className="font-medium text-foreground font-mono text-[13px]">{formatRupiah(preview?.total_revenue || 0)}</span>
                 </div>
-                <div className="font-semibold text-[24px] text-[var(--text-primary)] font-['Fraunces'] leading-none">{formatRupiah(preview?.adit_receives || 0)}</div>
-              </div>
-            </div>
-
-            <div className="bg-[var(--bg-elevated)] p-[16px] rounded-[10px] shadow-soft border border-[var(--border)]">
-              <div className="text-[var(--text-secondary)] font-['Inter_Tight_Variable'] text-[11px] uppercase tracking-wider mb-[4px]">Porsi Kila</div>
-              <div className="flex justify-between items-end">
-                <div className="text-[11px] text-[var(--text-secondary)] font-['JetBrains_Mono']">
-                  {formatRupiah(kilaTotal)} <span className="font-['Inter_Tight_Variable']">(modal)</span> + {formatRupiah((preview?.laba_bersih || 0) / 2)} <span className="font-['Inter_Tight_Variable']">(laba ÷ 2)</span>
+                <div className="flex justify-between text-destructive">
+                  <span>Total Modal</span>
+                  <span className="font-mono text-[13px]">- {formatRupiah(preview?.total_modal || 0)}</span>
                 </div>
-                <div className="font-semibold text-[24px] text-[var(--text-primary)] font-['Fraunces'] leading-none">{formatRupiah(preview?.kila_receives || 0)}</div>
-              </div>
-            </div>
-
-            {/* Settlement Block */}
-            <div className="bg-gradient-warm p-[16px] rounded-[10px] border border-[var(--amber-muted)] shadow-soft mt-[24px]">
-              <div className="text-[var(--text-primary)] font-bold mb-[12px] text-[15px] font-['Fraunces']">Settlement Akhir</div>
-              
-              <div className="space-y-[8px] mb-[16px] text-[13px] font-['Inter_Tight_Variable']">
-                <div className="flex justify-between text-[var(--text-secondary)]">
-                  <span>Uang dipegang Adit:</span>
-                  <span className="font-['JetBrains_Mono'] text-[var(--text-primary)]">{formatRupiah(preview?.adit_pegang || 0)}</span>
-                </div>
-                <div className="flex justify-between text-[var(--text-secondary)]">
-                  <span>Uang dipegang Kila:</span>
-                  <span className="font-['JetBrains_Mono'] text-[var(--text-primary)]">{formatRupiah(preview?.kila_pegang || 0)}</span>
+                
+                <div className="flex justify-between font-bold border-t border-border pt-[16px] mt-[16px]">
+                  <span className="text-foreground">Laba Bersih</span>
+                  <span className="text-[32px] text-terracotta font-display leading-none">
+                    {formatRupiah(preview?.laba_bersih || 0)}
+                  </span>
                 </div>
               </div>
 
-              {preview?.adit_transfer_to_kila > 0 && (
-                <div className="bg-white border border-[var(--amber)]/40 rounded-[8px] p-[12px] flex items-center gap-[12px] shadow-sm">
-                  <div className="text-[20px]">💸</div>
-                  <div>
-                    <div className="text-[11px] text-[var(--text-secondary)] font-['Inter_Tight_Variable'] uppercase tracking-wider mb-[2px]">Instruksi Transfer</div>
-                    <div className="text-[13px] text-[var(--text-primary)] font-['Inter_Tight_Variable']">
-                      Adit transfer ke Kila sebesar <span className="font-bold font-['Fraunces'] text-[var(--amber)] text-[15px]">{formatRupiah(preview.adit_transfer_to_kila)}</span>
+              <div className="mt-[24px] space-y-[12px]">
+                <div className="bg-card p-[16px] rounded-lg border border-border">
+                  <div className="text-muted-foreground font-sans text-[11px] uppercase tracking-wider mb-[4px]">Porsi Adit</div>
+                  <div className="flex justify-between items-end">
+                    <div className="text-[11px] text-muted-foreground font-mono">
+                      {formatRupiah(aditTotal)} <span className="font-sans">(modal)</span> + {formatRupiah((preview?.laba_bersih || 0) / 2)} <span className="font-sans">(laba ÷ 2)</span>
                     </div>
+                    <div className="font-semibold text-[24px] text-foreground font-display leading-none">{formatRupiah(preview?.adit_receives || 0)}</div>
                   </div>
                 </div>
-              )}
-              
-              {preview?.kila_transfer_to_adit > 0 && (
-                <div className="bg-white border border-[var(--amber)]/40 rounded-[8px] p-[12px] flex items-center gap-[12px] shadow-sm">
-                  <div className="text-[20px]">💸</div>
-                  <div>
-                    <div className="text-[11px] text-[var(--text-secondary)] font-['Inter_Tight_Variable'] uppercase tracking-wider mb-[2px]">Instruksi Transfer</div>
-                    <div className="text-[13px] text-[var(--text-primary)] font-['Inter_Tight_Variable']">
-                      Kila transfer ke Adit sebesar <span className="font-bold font-['Fraunces'] text-[var(--amber)] text-[15px]">{formatRupiah(preview.kila_transfer_to_adit)}</span>
+
+                <div className="bg-card p-[16px] rounded-lg border border-border">
+                  <div className="text-muted-foreground font-sans text-[11px] uppercase tracking-wider mb-[4px]">Porsi Kila</div>
+                  <div className="flex justify-between items-end">
+                    <div className="text-[11px] text-muted-foreground font-mono">
+                      {formatRupiah(kilaTotal)} <span className="font-sans">(modal)</span> + {formatRupiah((preview?.laba_bersih || 0) / 2)} <span className="font-sans">(laba ÷ 2)</span>
                     </div>
+                    <div className="font-semibold text-[24px] text-foreground font-display leading-none">{formatRupiah(preview?.kila_receives || 0)}</div>
                   </div>
                 </div>
-              )}
 
-              {preview?.adit_transfer_to_kila === 0 && preview?.kila_transfer_to_adit === 0 && (
-                <div className="bg-[var(--bg-elevated)] border border-[var(--border)] rounded-[6px] p-[12px] text-center text-[12px] text-[var(--text-secondary)]">
-                  Selesai! Tidak ada transfer yang diperlukan.
+                {/* Settlement Block */}
+                <div className="bg-gradient-warm p-[16px] rounded-lg border border-amber/20 mt-[24px]">
+                  <div className="text-foreground font-bold mb-[12px] text-[15px] font-display flex items-center gap-2">
+                    <Banknote className="h-5 w-5 text-amber" />
+                    Settlement Akhir
+                  </div>
+                  
+                  <div className="space-y-[8px] mb-[16px] text-[13px] font-sans">
+                    <div className="flex justify-between text-muted-foreground">
+                      <span>Uang dipegang Adit:</span>
+                      <span className="font-mono text-foreground">{formatRupiah(preview?.adit_pegang || 0)}</span>
+                    </div>
+                    <div className="flex justify-between text-muted-foreground">
+                      <span>Uang dipegang Kila:</span>
+                      <span className="font-mono text-foreground">{formatRupiah(preview?.kila_pegang || 0)}</span>
+                    </div>
+                  </div>
+
+                  {preview?.adit_transfer_to_kila > 0 && (
+                    <div className="bg-background border border-amber/40 rounded-lg p-[12px] flex items-center gap-[12px] shadow-sm">
+                      <div className="text-[20px]">💸</div>
+                      <div>
+                        <div className="text-[11px] text-muted-foreground font-sans uppercase tracking-wider mb-[2px]">Instruksi Transfer</div>
+                        <div className="text-[13px] text-foreground font-sans">
+                          Adit transfer ke Kila sebesar <span className="font-bold font-display text-terracotta text-[15px]">{formatRupiah(preview.adit_transfer_to_kila)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {preview?.kila_transfer_to_adit > 0 && (
+                    <div className="bg-background border border-amber/40 rounded-lg p-[12px] flex items-center gap-[12px] shadow-sm">
+                      <div className="text-[20px]">💸</div>
+                      <div>
+                        <div className="text-[11px] text-muted-foreground font-sans uppercase tracking-wider mb-[2px]">Instruksi Transfer</div>
+                        <div className="text-[13px] text-foreground font-sans">
+                          Kila transfer ke Adit sebesar <span className="font-bold font-display text-terracotta text-[15px]">{formatRupiah(preview.kila_transfer_to_adit)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {preview?.adit_transfer_to_kila === 0 && preview?.kila_transfer_to_adit === 0 && (
+                    <div className="bg-muted border border-border rounded-[6px] p-[12px] text-center text-[12px] text-muted-foreground">
+                      Selesai! Tidak ada transfer yang diperlukan.
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          </div>
+              </div>
+            </CardContent>
+          </Card>
 
           {!isClosed && (
-            <button 
+            <Button 
+              variant="destructive"
               onClick={() => setIsCloseModalOpen(true)}
-              className="btn-destructive w-full mt-[24px]"
+              className="w-full mt-[24px]"
             >
               Close Batch & Finalisasi
-            </button>
+            </Button>
           )}
         </div>
       </div>

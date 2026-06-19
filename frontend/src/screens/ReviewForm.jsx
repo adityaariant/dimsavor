@@ -6,6 +6,10 @@ import { calculateSubtotal, countDimsumBoxes } from '../utils/pricing';
 import { Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '../contexts/ToastContext';
+import { Input } from '../components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import { Button } from '../components/ui/button';
+import { Badge } from '../components/ui/badge';
 
 export default function ReviewForm({ initialData, session, onDiscard, refreshSessionData, isEditMode = false }) {
   const [data, setData] = useState(initialData);
@@ -191,94 +195,105 @@ export default function ReviewForm({ initialData, session, onDiscard, refreshSes
       <div className="flex-1 overflow-y-auto space-y-[24px] pr-[8px] hide-scrollbar">
         {/* Identitas */}
         <div>
-          <h3 className="card-header border-b border-[var(--border)] pb-[8px] mb-[12px]">Identitas Pelanggan</h3>
+          <h3 className="font-display font-semibold text-[14px] uppercase tracking-wide text-muted-foreground border-b border-border pb-[8px] mb-[12px]">Identitas Pelanggan</h3>
           <div className="space-y-[12px]">
             <div className="flex items-center">
-              <span className="w-24 form-label mb-0">Nama:</span>
-              <input 
-                className="form-input flex-1 h-[32px] text-[13px]" 
+              <span className="w-24 text-[13px] font-medium text-muted-foreground mb-0">Nama:</span>
+              <Input 
+                className="flex-1 h-[32px] text-[13px]" 
                 value={data.nama_pelanggan || ''} 
                 onChange={e => setData({...data, nama_pelanggan: e.target.value})} 
               />
             </div>
             <div className="flex items-center">
-              <span className="w-24 form-label mb-0">Alamat:</span>
-              <input 
-                className="form-input flex-1 h-[32px] text-[13px] mr-[8px]" 
+              <span className="w-24 text-[13px] font-medium text-muted-foreground mb-0">Alamat:</span>
+              <Input 
+                className="flex-1 h-[32px] text-[13px] mr-[8px]" 
                 value={data.alamat || ''} 
                 onChange={e => setData({...data, alamat: e.target.value})} 
               />
-              <span className="bg-[var(--amber-dim)] border border-[var(--amber)] text-[var(--amber)] px-[8px] py-[4px] rounded-[6px] text-[11px] font-medium font-['Inter_Tight_Variable'] whitespace-nowrap shadow-sm">
+              <span className="bg-amber/10 border border-amber/20 text-amber px-[8px] py-[4px] rounded-[6px] text-[11px] font-medium font-sans whitespace-nowrap shadow-sm">
                 🏷️ {data.area_tag || 'Lainnya'}
               </span>
             </div>
             <div className="flex items-start">
-              <span className="w-24 form-label mt-[8px]">Jadwal:</span>
+              <span className="w-24 text-[13px] font-medium text-muted-foreground mt-[8px]">Jadwal:</span>
               <div className="flex-1 flex flex-col gap-[4px]">
                 <div className="flex gap-[8px]">
                   {isCustomSlot ? (
-                    <input 
-                      className="form-input flex-1 h-[32px] text-[13px]"
+                    <Input 
+                      className="flex-1 h-[32px] text-[13px]"
                       placeholder="Ketik jadwal baru..."
                       value={customSlotText}
                       onChange={e => setCustomSlotText(e.target.value)}
                     />
                   ) : (
-                    <select 
-                      className="form-select flex-1 h-[32px] text-[13px]"
-                      value={data.matched_slot?.id_slot || ''}
-                      onChange={e => {
-                        if (e.target.value === "NEW") {
+                    <Select 
+                      value={data.matched_slot?.id_slot?.toString() || 'manual'}
+                      onValueChange={value => {
+                        if (value === "NEW") {
                           setIsCustomSlot(true);
+                        } else if (value === "manual") {
+                          setData({...data, matched_slot: null});
                         } else {
-                          const sId = e.target.value;
-                          const slot = slots.find(s => s.id_slot == sId);
+                          const slot = slots.find(s => s.id_slot.toString() === value);
                           setData({...data, matched_slot: slot || null});
                         }
                       }}
                     >
-                      <option value="">Manual / Belum Pilih</option>
-                      {slots.map(s => (
-                        <option key={s.id_slot} value={s.id_slot}>{s.jadwal_teks}</option>
-                      ))}
-                      <option value="NEW">✨ Ketik jadwal baru...</option>
-                    </select>
+                      <SelectTrigger className="flex-1 h-[32px] text-[13px]">
+                        <SelectValue placeholder="Manual / Belum Pilih" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="manual">Manual / Belum Pilih</SelectItem>
+                        {slots.map(s => (
+                          <SelectItem key={s.id_slot} value={s.id_slot.toString()}>{s.jadwal_teks}</SelectItem>
+                        ))}
+                        <SelectItem value="NEW">✨ Ketik jadwal baru...</SelectItem>
+                      </SelectContent>
+                    </Select>
                   )}
                   {isCustomSlot && (
-                    <button 
+                    <Button 
+                      variant="ghost"
+                      size="sm"
                       onClick={() => setIsCustomSlot(false)}
-                      className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-[12px] px-[8px] font-medium"
+                      className="text-muted-foreground hover:text-foreground text-[12px] px-[8px] font-medium h-[32px]"
                     >
                       Batal
-                    </button>
+                    </Button>
                   )}
                 </div>
                 {isCustomSlot && (
-                  <p className="text-[11px] text-[var(--amber)]">
+                  <p className="text-[11px] text-terracotta">
                     Jadwal baru akan otomatis dibuat dan disimpan.
                   </p>
                 )}
               </div>
             </div>
             <div className="flex items-center">
-              <span className="w-24 form-label mb-0">Pembayaran:</span>
-              <select 
-                className="form-select flex-1 h-[32px] text-[13px]"
+              <span className="w-24 text-[13px] font-medium text-muted-foreground mb-0">Pembayaran:</span>
+              <Select 
                 value={data.metode_bayar || 'BCA'}
-                onChange={e => setData({...data, metode_bayar: e.target.value})}
+                onValueChange={value => setData({...data, metode_bayar: value})}
               >
-                {['QRIS', 'BCA', 'BNI', 'Cash Adit', 'Cash Kila', 'Shopeepay', 'Dana'].map(m => (
-                  <option key={m} value={m}>{m}</option>
-                ))}
-              </select>
+                <SelectTrigger className="flex-1 h-[32px] text-[13px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {['QRIS', 'BCA', 'BNI', 'Cash Adit', 'Cash Kila', 'Shopeepay', 'Dana'].map(m => (
+                    <SelectItem key={m} value={m}>{m}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="flex items-center">
-              <span className="w-24 form-label mb-0">Ongkir:</span>
+              <span className="w-24 text-[13px] font-medium text-muted-foreground mb-0">Ongkir:</span>
               <div className="flex-1 flex gap-[8px] items-center">
-                <span className="font-['JetBrains_Mono'] text-[12px] text-[var(--text-secondary)]">Rp</span>
-                <input 
+                <span className="font-mono text-[12px] text-muted-foreground">Rp</span>
+                <Input 
                   type="number"
-                  className={`form-input w-[120px] h-[32px] text-right font-['JetBrains_Mono'] text-[13px] ${isCustomOngkir ? 'border-[var(--amber)]' : ''}`}
+                  className={`w-[120px] h-[32px] text-right font-mono text-[13px] ${isCustomOngkir ? 'border-terracotta' : ''}`}
                   value={data.ongkir}
                   onChange={e => {
                     setIsCustomOngkir(true);
@@ -287,18 +302,18 @@ export default function ReviewForm({ initialData, session, onDiscard, refreshSes
                 />
                 {!isCustomOngkir ? (
                   data.ongkir === 0 ? (
-                    <span className="badge badge-sent bg-opacity-20 ml-2">🟢 Gratis ({data.ongkir_rule})</span>
+                    <Badge variant="sent" className="ml-2">🟢 Gratis ({data.ongkir_rule})</Badge>
                   ) : (
-                    <span className="badge badge-pending bg-opacity-20 ml-2">🟡 {data.ongkir_rule}</span>
+                    <Badge variant="pending" className="ml-2">🟡 {data.ongkir_rule}</Badge>
                   )
                 ) : (
                   <>
-                    <span className="badge badge-pending bg-opacity-20 ml-2">🟠 Manual</span>
+                    <Badge variant="pending" className="ml-2">🟠 Manual</Badge>
                     <button 
                       onClick={() => {
                         setIsCustomOngkir(false);
                       }}
-                      className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-[11px] px-[8px] underline"
+                      className="text-muted-foreground hover:text-foreground text-[11px] px-[8px] underline"
                     >
                       Reset Otomatis
                     </button>
@@ -312,55 +327,57 @@ export default function ReviewForm({ initialData, session, onDiscard, refreshSes
         {/* Item Pesanan */}
         <div>
           <div className="flex justify-between items-center mb-[12px]">
-            <h3 className="card-header border-b-0 pb-0 mb-0">Item Pesanan</h3>
+            <h3 className="font-display font-semibold text-[14px] uppercase tracking-wide text-muted-foreground">Item Pesanan</h3>
             <button
               type="button"
               onClick={handleAddItem}
-              className="text-[12px] text-[var(--amber)] hover:underline font-medium flex items-center gap-[4px]"
+              className="text-[12px] text-terracotta hover:underline font-medium flex items-center gap-[4px]"
             >
               ➕ Tambah Item Baru
             </button>
           </div>
-          <div className="border border-[var(--border)] rounded-[6px] overflow-hidden">
+          <div className="border border-border rounded-[6px] overflow-hidden">
             <table className="min-w-full text-left">
-              <thead className="bg-[var(--bg-elevated)] border-b border-[var(--border)]">
+              <thead className="bg-muted/50 border-b border-border">
                 <tr>
-                  <th className="px-[12px] py-[8px] text-[12px] font-medium text-[var(--text-secondary)]">Produk</th>
-                  <th className="px-[12px] py-[8px] text-[12px] font-medium text-[var(--text-secondary)] text-center w-[60px]">Qty</th>
-                  <th className="px-[12px] py-[8px] text-[12px] font-medium text-[var(--text-secondary)]">Topping</th>
-                  <th className="px-[12px] py-[8px] text-[12px] font-medium text-[var(--text-secondary)] text-right w-[150px]">Subtotal</th>
+                  <th className="px-[12px] py-[8px] text-[12px] font-medium text-muted-foreground">Produk</th>
+                  <th className="px-[12px] py-[8px] text-[12px] font-medium text-muted-foreground text-center w-[60px]">Qty</th>
+                  <th className="px-[12px] py-[8px] text-[12px] font-medium text-muted-foreground">Topping</th>
+                  <th className="px-[12px] py-[8px] text-[12px] font-medium text-muted-foreground text-right w-[150px]">Subtotal</th>
                   <th className="px-[12px] py-[8px] w-[40px]"></th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[var(--border)]">
+              <tbody className="divide-y divide-border">
                 {data.items.map((item, idx) => (
-                  <tr key={idx} className={item._unmatched ? 'bg-[var(--status-cancelled)]/10' : ''}>
+                  <tr key={idx} className={item._unmatched ? 'bg-destructive/10' : ''}>
                     <td className="px-[12px] py-[8px]">
                       {item._unmatched ? (
                         <div className="flex flex-col gap-1.5 p-1">
-                          <span className="text-[var(--status-cancelled)] font-medium text-[11px]">⚠️ Teks asli: "{item.nama_produk}"</span>
+                          <span className="text-destructive font-medium text-[11px]">⚠️ Teks asli: "{item.nama_produk}"</span>
                           <div className="flex gap-1.5">
                             <select 
-                              className="form-select h-[28px] text-[11px] p-1 flex-1 min-w-0"
+                              className="flex h-7 w-full items-center justify-between rounded-md border border-input bg-background px-2 py-1 text-[11px]"
                               onChange={e => handleUnmatchedResolve(idx, e.target.value)}
                               defaultValue=""
                             >
                               <option value="" disabled>Match ke alias baku...</option>
                               {aliases.map(a => <option key={a} value={a}>{a}</option>)}
                             </select>
-                            <button
+                            <Button
                               type="button"
+                              variant="outline"
+                              size="sm"
                               onClick={() => handleUnmatchedResolve(idx, item.nama_produk)}
-                              className="btn-secondary h-[28px] text-[10px] px-2 whitespace-nowrap border border-[var(--border)] bg-[var(--bg-elevated)] text-[var(--text-primary)]"
+                              className="h-7 text-[10px] px-2 whitespace-nowrap"
                             >
                               Gunakan teks asli
-                            </button>
+                            </Button>
                           </div>
                         </div>
                       ) : (
-                        <input 
+                        <Input 
                           list="products-datalist"
-                          className="form-input h-[28px] text-[12px] bg-transparent border-transparent px-1 focus:border-[var(--border)] focus:bg-[var(--bg-elevated)] focus:ring-0" 
+                          className="h-[28px] text-[12px] bg-transparent border-transparent px-1 focus-visible:border-border focus-visible:bg-muted" 
                           value={item.nama_produk} 
                           placeholder="Pilih atau ketik produk..."
                           onChange={e => {
@@ -385,7 +402,7 @@ export default function ReviewForm({ initialData, session, onDiscard, refreshSes
                       )}
                     </td>
                     <td className="px-[12px] py-[8px] text-center">
-                      <input className="form-input h-[28px] text-[12px] font-['JetBrains_Mono'] px-1 text-center w-full focus:ring-0" type="number" min="1" value={item.qty || 1} onChange={e => {
+                      <Input className="h-[28px] text-[12px] font-mono px-1 text-center w-full" type="number" min="1" value={item.qty || 1} onChange={e => {
                         const newItems = [...data.items];
                         newItems[idx].qty = Number(e.target.value);
                         setData({...data, items: newItems});
@@ -393,8 +410,8 @@ export default function ReviewForm({ initialData, session, onDiscard, refreshSes
                     </td>
                     <td className="px-[12px] py-[8px]">
                       {!item._unmatched && (
-                        <input 
-                          className="form-input h-[28px] text-[12px] w-full focus:ring-0" 
+                        <Input 
+                          className="h-[28px] text-[12px] w-full" 
                           value={item.topping || ''} 
                           onChange={e => {
                             const newItems = [...data.items];
@@ -408,11 +425,11 @@ export default function ReviewForm({ initialData, session, onDiscard, refreshSes
                     <td className="px-[12px] py-[8px] text-right text-[12px]">
                       {!item._unmatched && (
                         <div className="flex items-center justify-end gap-1">
-                          <span className="text-[10px] text-[var(--text-secondary)]">Rp</span>
-                          <input
+                          <span className="text-[10px] text-muted-foreground">Rp</span>
+                          <Input
                             type="number"
-                            className={`form-input h-[28px] text-[12px] font-['JetBrains_Mono'] px-1 text-right w-[75px] focus:ring-0 ${
-                              item.is_custom_price ? 'border-[var(--amber)] bg-[var(--amber-dim)] text-[var(--amber)] font-bold' : 'border-transparent bg-transparent'
+                            className={`h-[28px] text-[12px] font-mono px-1 text-right w-[75px] ${
+                              item.is_custom_price ? 'border-terracotta bg-terracotta/10 text-terracotta font-bold' : 'border-transparent bg-transparent'
                             }`}
                             value={item.subtotal || 0}
                             onChange={e => {
@@ -431,7 +448,7 @@ export default function ReviewForm({ initialData, session, onDiscard, refreshSes
                                 newItems[idx].is_custom_price = false;
                                 setData({...data, items: newItems});
                               }}
-                              className="text-[9px] text-[var(--amber)] hover:underline ml-1 font-bold bg-[var(--amber-dim)] px-1 py-0.5 rounded border border-[var(--amber)]"
+                              className="text-[9px] text-terracotta hover:underline ml-1 font-bold bg-terracotta/10 px-1 py-0.5 rounded border border-terracotta/30"
                             >
                               Auto
                             </button>
@@ -439,7 +456,7 @@ export default function ReviewForm({ initialData, session, onDiscard, refreshSes
                         </div>
                       )}
                     </td>
-                    <td className="px-[12px] py-[8px] text-center text-[var(--text-disabled)] hover:text-[var(--status-cancelled)] cursor-pointer" onClick={() => handleItemDelete(idx)}>
+                    <td className="px-[12px] py-[8px] text-center text-muted-foreground hover:text-destructive cursor-pointer" onClick={() => handleItemDelete(idx)}>
                       <Trash2 className="w-4 h-4 mx-auto" />
                     </td>
                   </tr>
@@ -456,30 +473,30 @@ export default function ReviewForm({ initialData, session, onDiscard, refreshSes
 
         {/* Ringkasan */}
         <div>
-          <h3 className="card-header border-b border-[var(--border)] pb-[8px] mb-[12px]">Ringkasan</h3>
-          <div className="bg-[var(--bg-elevated)] p-[16px] rounded-[10px] shadow-soft border border-[var(--border)] text-[13px] font-['Inter_Tight_Variable'] space-y-[4px]">
-            <div className="flex justify-between text-[var(--text-secondary)]"><span>Subtotal items:</span> <span className="font-['JetBrains_Mono'] text-[12px]">{formatRupiah(subtotal)}</span></div>
-            <div className="flex justify-between text-[var(--text-secondary)]"><span>Ongkir:</span> <span className="font-['JetBrains_Mono'] text-[12px]">{formatRupiah(data.ongkir)}</span></div>
-            <div className="flex justify-between font-bold text-[var(--text-primary)] pt-[8px] border-t border-[var(--border)] mt-[8px]">
-              <span>Total:</span> <span className="font-['Fraunces'] text-[18px] text-[var(--amber)] leading-none">{formatRupiah(total)}</span>
+          <h3 className="font-display font-semibold text-[14px] uppercase tracking-wide text-muted-foreground border-b border-border pb-[8px] mb-[12px]">Ringkasan</h3>
+          <div className="bg-card p-[16px] rounded-[10px] shadow-soft border border-border text-[13px] font-sans space-y-[4px]">
+            <div className="flex justify-between text-muted-foreground"><span>Subtotal items:</span> <span className="font-mono text-[12px]">{formatRupiah(subtotal)}</span></div>
+            <div className="flex justify-between text-muted-foreground"><span>Ongkir:</span> <span className="font-mono text-[12px]">{formatRupiah(data.ongkir)}</span></div>
+            <div className="flex justify-between font-bold text-foreground pt-[8px] border-t border-border mt-[8px]">
+              <span>Total:</span> <span className="font-display text-[18px] text-terracotta leading-none">{formatRupiah(total)}</span>
             </div>
-            <div className="mt-[12px] pt-[12px] border-t border-[var(--border)] border-dashed text-[11px] text-[var(--text-secondary)]">
-              Kuota terpakai: <span className="font-medium text-[var(--text-primary)]">{countDimsumBoxes(data.items)} box</span> dimsum
+            <div className="mt-[12px] pt-[12px] border-t border-border border-dashed text-[11px] text-muted-foreground">
+              Kuota terpakai: <span className="font-medium text-foreground">{countDimsumBoxes(data.items)} box</span> dimsum
             </div>
           </div>
         </div>
       </div>
 
       {/* Action Footer */}
-      <div className="pt-[16px] mt-auto border-t border-[var(--border)] flex justify-between items-center bg-[var(--bg-surface)]">
-        <button onClick={onDiscard} className="btn-secondary px-[16px]">Discard</button>
-        <button 
+      <div className="pt-[16px] mt-auto border-t border-border flex justify-between items-center bg-background">
+        <Button variant="outline" onClick={onDiscard} className="px-[16px]">Discard</Button>
+        <Button 
           onClick={checkQuotaAndSave}
           disabled={saving || data.items.length === 0}
-          className="btn-primary flex items-center gap-[8px]"
+          className="flex items-center gap-[8px]"
         >
           {saving ? 'Menyimpan...' : '✓ Konfirmasi & Simpan'}
-        </button>
+        </Button>
       </div>
 
       <ConfirmModal

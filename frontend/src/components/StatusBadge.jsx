@@ -1,20 +1,16 @@
 import React from 'react';
+import { Badge } from './ui/badge';
 
-const colorMap = {
-  UNPAID: 'badge-unpaid',
-  PAID: 'badge-paid',
-  PENDING: 'badge-pending',
-  SENT: 'badge-sent',
-  CANCELLED: 'badge-cancelled',
-  Active: 'badge-paid',
-  Closed: 'badge-pending'
-};
+export default function StatusBadge({ status }) {
+  let variant = 'default';
+  const s = status?.toUpperCase() || '';
+  
+  if (s === 'PAID') variant = 'paid';
+  else if (s === 'SENT') variant = 'sent';
+  else if (s === 'PENDING') variant = 'pending';
+  else if (s === 'UNPAID') variant = 'unpaid';
+  else if (s === 'CANCELLED') variant = 'cancelled';
+  else if (s === 'CLOSED' || s === 'CLOSED_BATCH') variant = 'closed';
 
-export default function StatusBadge({ status, className = '' }) {
-  const baseColor = colorMap[status] || 'badge-pending';
-  return (
-    <span className={`badge ${baseColor} ${className}`}>
-      {status}
-    </span>
-  );
+  return <Badge variant={variant}>{status}</Badge>;
 }

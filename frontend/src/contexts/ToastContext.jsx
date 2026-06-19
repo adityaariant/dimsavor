@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
-import Toast from '../components/Toast';
+import React, { createContext, useContext, useCallback } from 'react';
+import { toast } from 'sonner';
 
 const ToastContext = createContext(null);
 
@@ -12,31 +12,21 @@ export const useToast = () => {
 };
 
 export const ToastProvider = ({ children }) => {
-  const [toasts, setToasts] = useState([]);
-
   const showToast = useCallback((message, type = 'info') => {
-    const id = Date.now().toString();
-    setToasts((prev) => [...prev, { id, message, type }]);
-  }, []);
-
-  const removeToast = useCallback((id) => {
-    setToasts((prev) => prev.filter((toast) => toast.id !== id));
+    if (type === 'success') {
+      toast.success(message);
+    } else if (type === 'error') {
+      toast.error(message);
+    } else if (type === 'warning') {
+      toast.warning(message);
+    } else {
+      toast(message);
+    }
   }, []);
 
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
-      <div className="fixed bottom-4 right-4 z-[100] flex flex-col gap-2 pointer-events-none">
-        {toasts.map((toast) => (
-          <Toast
-            key={toast.id}
-            id={toast.id}
-            message={toast.message}
-            type={toast.type}
-            onClose={removeToast}
-          />
-        ))}
-      </div>
     </ToastContext.Provider>
   );
 };
